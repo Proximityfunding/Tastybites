@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getDefaultBranch } from "@/lib/branch";
 import { createOrder, type CartItemInput } from "@/lib/orders";
@@ -39,6 +40,11 @@ export async function submitCheckout(formData: FormData) {
     isPickup,
     complete: false,
   });
+
+  revalidatePath("/orders");
+  revalidatePath("/kitchen");
+  revalidatePath("/inventory");
+  revalidatePath("/customers");
 
   redirect(`/shop/thank-you/${order.id}`);
 }
