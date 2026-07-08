@@ -2,7 +2,7 @@ import { requirePageRole } from "@/lib/access";
 import { db } from "@/lib/db";
 import { STATUS_LABELS, KITCHEN_NEXT_STATUS, KDS_ACTIVE_STATUSES } from "@/lib/orderStatus";
 import { changeOrderStatus } from "../orders/actions";
-import KDSAutoRefresh from "./KDSAutoRefresh";
+import AutoRefresh from "@/components/AutoRefresh";
 import type { OrderStatus } from "@prisma/client";
 
 const COLUMN_STYLE: Record<string, { header: string; badge: string }> = {
@@ -44,7 +44,7 @@ export default async function KitchenDisplayPage() {
 
   return (
     <div>
-      <KDSAutoRefresh />
+      <AutoRefresh />
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Kitchen Display</h1>
         <span className="text-xs text-gray-400">Auto-refreshes every 15s</span>

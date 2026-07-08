@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
+import AutoRefresh from "@/components/AutoRefresh";
 import { changeOrderStatus } from "./actions";
 import type { OrderStatus } from "@prisma/client";
 
@@ -32,8 +33,12 @@ export default async function OrdersPage({
 
   return (
     <div>
+      <AutoRefresh />
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
+          <span className="text-xs text-gray-400">Auto-refreshes every 15s</span>
+        </div>
         {!isKitchen && (
           <Link
             href="/orders/new"
