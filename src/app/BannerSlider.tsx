@@ -14,28 +14,28 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    image: "/uploads/banners/banner-burgers.jpg",
+    image: "/brand/banners/banner-burgers.jpg",
     eyebrow: "Fan Favorite",
     headline: "Bold Flavors, Big Bites",
     subtext: "Juicy, stacked burgers made fresh the moment you order.",
     ctaLabel: "Order Now",
   },
   {
-    image: "/uploads/banners/banner-drinks.jpg",
+    image: "/brand/banners/banner-drinks.jpg",
     eyebrow: "Beat the Heat",
     headline: "Cool Down, Refresh Up",
     subtext: "Fresh calamansi juice and milk tea, made daily.",
     ctaLabel: "See Drinks",
   },
   {
-    image: "/uploads/banners/banner-feast.jpg",
+    image: "/brand/banners/banner-feast.jpg",
     eyebrow: "Barkada Favorite",
     headline: "Perfect For Sharing",
     subtext: "Snacks and platters the whole crew will love.",
     ctaLabel: "Order Now",
   },
   {
-    image: "/uploads/banners/banner-desserts.jpg",
+    image: "/brand/banners/banner-desserts.jpg",
     eyebrow: "Sweet Tooth?",
     headline: "Sweet Cravings, Covered",
     subtext: "Halo-halo and cool treats to end your meal right.",

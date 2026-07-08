@@ -54,6 +54,7 @@ const PRODUCTS = [
     description: "Beef patty, cheese, lettuce, and bun.",
     cost: 4000,
     price: 8900,
+    imageUrl: "/brand/products/classic-burger.jpg",
     recipe: [
       { key: "burger_bun", qty: 1 },
       { key: "beef_patty", qty: 1 },
@@ -68,6 +69,7 @@ const PRODUCTS = [
     description: "Two beef patties, double cheese, bun.",
     cost: 5800,
     price: 12900,
+    imageUrl: "/brand/products/double-cheeseburger.jpg",
     recipe: [
       { key: "burger_bun", qty: 1 },
       { key: "beef_patty", qty: 2 },
@@ -82,6 +84,7 @@ const PRODUCTS = [
     description: "Steamed pork shomai, 6 pieces per order.",
     cost: 2700,
     price: 6000,
+    imageUrl: "/brand/products/pork-shomai.jpg",
     recipe: [
       { key: "shomai_wrapper", qty: 6 },
       { key: "pork_filling", qty: 180 },
@@ -94,6 +97,7 @@ const PRODUCTS = [
     description: "Shaved ice with ube, leche flan, sweet beans, and milk.",
     cost: 3200,
     price: 7500,
+    imageUrl: "/brand/products/halo-halo-regular.jpg",
     recipe: [
       { key: "shaved_ice", qty: 250 },
       { key: "ube_halaya", qty: 40 },
@@ -109,6 +113,7 @@ const PRODUCTS = [
     description: "Fried chicken with steamed rice and gravy.",
     cost: 4500,
     price: 9500,
+    imageUrl: "/brand/products/fried-chicken-rice-meal.jpg",
     recipe: [
       { key: "rice", qty: 200 },
       { key: "fried_chicken", qty: 1 },
@@ -122,6 +127,7 @@ const PRODUCTS = [
     description: "Classic milk tea with tapioca pearls.",
     cost: 2600,
     price: 6500,
+    imageUrl: "/brand/products/milk-tea-classic.jpg",
     recipe: [
       { key: "milk_tea_base", qty: 300 },
       { key: "tapioca_pearls", qty: 60 },
@@ -134,6 +140,7 @@ const PRODUCTS = [
     description: "Freshly squeezed calamansi juice, lightly sweetened.",
     cost: 1500,
     price: 4500,
+    imageUrl: "/brand/products/calamansi-juice.jpg",
     recipe: [
       { key: "calamansi_juice", qty: 60 },
       { key: "sugar_syrup", qty: 30 },
@@ -206,7 +213,7 @@ async function main() {
   for (const product of PRODUCTS) {
     const record = await db.product.upsert({
       where: { slug: product.slug },
-      update: {},
+      update: { imageUrl: product.imageUrl },
       create: {
         branchId: branch.id,
         slug: product.slug,
@@ -215,6 +222,7 @@ async function main() {
         description: product.description,
         cost: product.cost,
         price: product.price,
+        imageUrl: product.imageUrl,
       },
     });
 
