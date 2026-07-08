@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import AutoRefresh from "@/components/AutoRefresh";
+import VoidOrderButton from "./VoidOrderButton";
 import { changeOrderStatus } from "./actions";
 import type { OrderStatus } from "@prisma/client";
 
@@ -15,6 +16,7 @@ export default async function OrdersPage({
   const session = await auth();
   const { status, channel } = await searchParams;
   const isKitchen = session!.user.role === "KITCHEN";
+  const isOwner = session!.user.role === "OWNER_ADMIN";
 
   const orders = await db.order.findMany({
     where: {
@@ -91,13 +93,16 @@ export default async function OrdersPage({
                 </td>
                 <td className="py-2 pr-4 text-gray-600">{order.customer?.name || "—"}</td>
                 <td className="py-2 pr-4">
-                  {next && (
-                    <form action={changeOrderStatus.bind(null, order.id, next)} className="inline">
-                      <button type="submit" className="text-orange-600 hover:underline">
-                        Mark {STATUS_LABELS[next]}
-                      </button>
-                    </form>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {next && (
+                      <form action={changeOrderStatus.bind(null, order.id, next)} className="inline">
+                        <button type="submit" className="text-orange-600 hover:underline">
+                          Mark {STATUS_LABELS[next]}
+                        </button>
+                      </form>
+                    )}
+                    {isOwner && order.status !== "VOIDED" && <VoidOrderButton orderId={order.id} />}
+                  </div>
                 </td>
               </tr>
             );
