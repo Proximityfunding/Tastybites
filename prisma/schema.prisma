@@ -1,0 +1,376 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER_ADMIN
+  CASHIER_STAFF
+  KITCHEN
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+
+  users         User[]
+  products      Product[]
+  categories    Category[]
+  ingredients   Ingredient[]
+  suppliers     Supplier[]
+  customers     Customer[]
+  orders        Order[]
+  expenses      Expense[]
+  stockLogs     StockLog[]
+  ledgerEntries LedgerEntry[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@unique([branchId, name])
+  @@index([branchId])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id])
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ordersCreated   Order[]    @relation("OrderCreatedBy")
+  expensesCreated Expense[]  @relation("ExpenseCreatedBy")
+  stockLogs       StockLog[] @relation("StockLogUser")
+  auditLogs       AuditLog[] @relation("AuditLogUser")
+
+  @@index([branchId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  name        String
+  slug        String   @unique
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  description String?
+  cost        Int      @default(0) // centavos; direct cost estimate for margin visibility
+  price       Int // centavos; SRP (suggested retail price)
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recipe     ProductIngredient[]
+  orderItems OrderItem[]
+
+  @@index([branchId])
+  @@index([categoryId])
+}
+
+model Ingredient {
+  id           String    @id @default(cuid())
+  branchId     String
+  branch       Branch    @relation(fields: [branchId], references: [id])
+  name         String
+  unit         String
+  stockQty     Float     @default(0)
+  reorderLevel Float     @default(0)
+  costPerUnit  Int       @default(0) // centavos
+  supplierId   String?
+  supplier     Supplier? @relation(fields: [supplierId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  usedIn    ProductIngredient[]
+  stockLogs StockLog[]
+
+  @@index([branchId])
+  @@index([supplierId])
+}
+
+model ProductIngredient {
+  id           String     @id @default(cuid())
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity     Float // amount of ingredient consumed per 1 unit of product sold
+
+  @@unique([productId, ingredientId])
+  @@index([ingredientId])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  name        String
+  contactName String?
+  phone       String?
+  email       String?
+  address     String?
+  createdAt   DateTime @default(now())
+
+  ingredients Ingredient[]
+
+  @@index([branchId])
+}
+
+enum StockLogType {
+  STOCK_IN
+  STOCK_OUT_SALE
+  STOCK_OUT_WASTE
+  ADJUSTMENT
+}
+
+model StockLog {
+  id           String       @id @default(cuid())
+  branchId     String
+  branch       Branch       @relation(fields: [branchId], references: [id])
+  ingredientId String
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
+  type         StockLogType
+  quantity     Float // magnitude of the change; sign is implied by type
+  reason       String?
+  refOrderId   String?
+  refOrder     Order?       @relation(fields: [refOrderId], references: [id])
+  userId       String?
+  user         User?        @relation("StockLogUser", fields: [userId], references: [id])
+  createdAt    DateTime     @default(now())
+
+  @@index([branchId])
+  @@index([ingredientId])
+  @@index([refOrderId])
+}
+
+model Customer {
+  id          String    @id @default(cuid())
+  branchId    String
+  branch      Branch    @relation(fields: [branchId], references: [id])
+  name        String
+  phone       String?
+  address     String?
+  fbHandle    String?
+  tags        String[]  @default([])
+  totalSpend  Int       @default(0) // centavos
+  lastOrderAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  orders Order[]
+
+  @@index([branchId])
+  @@index([phone])
+}
+
+enum OrderChannel {
+  DINE_IN
+  WALK_IN
+  ONLINE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+  VOIDED
+}
+
+enum PaymentMethod {
+  CASH
+  GCASH
+  CARD
+  UNPAID
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  branchId      String
+  branch        Branch        @relation(fields: [branchId], references: [id])
+  channel       OrderChannel
+  status        OrderStatus   @default(PENDING)
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  subtotal      Int
+  discount      Int           @default(0)
+  total         Int
+  paymentMethod PaymentMethod @default(UNPAID)
+  amountPaid    Int           @default(0)
+  isPickup      Boolean       @default(false)
+  notes         String?
+  voidReason    String?
+  createdById   String?
+  createdBy     User?         @relation("OrderCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items         OrderItem[]
+  delivery      Delivery?
+  stockLogs     StockLog[]
+  ledgerEntries LedgerEntry[]
+  auditLogs     AuditLog[]
+
+  @@index([branchId])
+  @@index([channel])
+  @@index([status])
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  qty       Int
+  unitPrice Int
+  modifiers Json?
+  lineTotal Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum DeliveryStatus {
+  PENDING
+  DISPATCHED
+  DELIVERED
+  FAILED
+  RETURNED
+}
+
+model Delivery {
+  id            String         @id @default(cuid())
+  orderId       String         @unique
+  order         Order          @relation(fields: [orderId], references: [id])
+  riderProvider String?
+  riderContact  String?
+  dispatchedAt  DateTime?
+  deliveredAt   DateTime?
+  status        DeliveryStatus @default(PENDING)
+  deliveryFee   Int            @default(0)
+  proofUrl      String?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum ExpenseCategory {
+  SUPPLIES
+  RENT
+  UTILITIES
+  SALARIES
+  DELIVERY_FEES
+  MISC
+}
+
+model Expense {
+  id                 String          @id @default(cuid())
+  branchId           String
+  branch             Branch          @relation(fields: [branchId], references: [id])
+  category           ExpenseCategory
+  amount             Int // centavos
+  date               DateTime
+  vendor             String?
+  receiptUrl         String?
+  notes              String?
+  isRecurring        Boolean         @default(false)
+  recurrenceInterval String? // "weekly" | "monthly" | "yearly"
+  recurrenceParentId String?
+  createdById        String?
+  createdBy          User?           @relation("ExpenseCreatedBy", fields: [createdById], references: [id])
+  createdAt          DateTime        @default(now())
+
+  ledgerEntries LedgerEntry[]
+
+  @@index([branchId])
+  @@index([category])
+  @@index([date])
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model ChartOfAccount {
+  id   String      @id @default(cuid())
+  code String      @unique
+  name String
+  type AccountType
+
+  ledgerEntries LedgerEntry[]
+}
+
+enum LedgerRefType {
+  ORDER
+  EXPENSE
+}
+
+model LedgerEntry {
+  id          String         @id @default(cuid())
+  branchId    String
+  branch      Branch         @relation(fields: [branchId], references: [id])
+  accountId   String
+  account     ChartOfAccount @relation(fields: [accountId], references: [id])
+  debit       Int            @default(0) // centavos
+  credit      Int            @default(0) // centavos
+  refType     LedgerRefType
+  orderId     String?
+  order       Order?         @relation(fields: [orderId], references: [id])
+  expenseId   String?
+  expense     Expense?       @relation(fields: [expenseId], references: [id])
+  description String?
+  date        DateTime       @default(now())
+  createdAt   DateTime       @default(now())
+
+  @@index([branchId])
+  @@index([accountId])
+  @@index([date])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation("AuditLogUser", fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  reason     String?
+  before     Json?
+  after      Json?
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
