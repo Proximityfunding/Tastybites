@@ -6,9 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createClient() {
-  // Each serverless function keeps its own pool; cap it to 1 connection and let
-  // Supabase's Supavisor transaction pooler handle fan-out across invocations.
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL!, max: 1 });
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
   return new PrismaClient({ adapter });
 }
 
