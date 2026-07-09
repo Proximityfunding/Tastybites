@@ -40,13 +40,15 @@ export default async function ReportsPage({
   }
   const totalSales = orders.reduce((s, o) => s + o.total, 0);
 
+  const paidOrders = orders.filter((o) => o.paymentMethod !== "UNPAID");
   const salesByPayment = new Map<string, { count: number; total: number }>();
-  for (const o of orders) {
+  for (const o of paidOrders) {
     const bucket = salesByPayment.get(o.paymentMethod) || { count: 0, total: 0 };
     bucket.count += 1;
     bucket.total += o.total;
     salesByPayment.set(o.paymentMethod, bucket);
   }
+  const totalPaidSales = paidOrders.reduce((s, o) => s + o.total, 0);
 
   const expenses = await db.expense.findMany({
     where: { branchId, date: { gte: from, lte: to } },
@@ -124,10 +126,17 @@ export default async function ReportsPage({
                   <td className="py-2 pr-4 text-gray-600">{formatCentavos(data.total)}</td>
                 </tr>
               ))}
+              {paidOrders.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-2 pr-4 text-gray-400">
+                    No paid orders in this period.
+                  </td>
+                </tr>
+              )}
               <tr className="font-semibold text-gray-900">
                 <td className="py-2 pr-4">Total</td>
-                <td className="py-2 pr-4">{orders.length}</td>
-                <td className="py-2 pr-4">{formatCentavos(totalSales)}</td>
+                <td className="py-2 pr-4">{paidOrders.length}</td>
+                <td className="py-2 pr-4">{formatCentavos(totalPaidSales)}</td>
               </tr>
             </tbody>
           </table>
