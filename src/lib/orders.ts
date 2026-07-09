@@ -5,6 +5,14 @@ import type { Prisma, OrderChannel, OrderStatus, PaymentMethod } from "@prisma/c
 
 type TxClient = Prisma.TransactionClient;
 
+/**
+ * Prisma's default interactive-transaction timeout (5s) isn't enough here: these
+ * transactions do a sequential round trip per recipe ingredient, and the app's
+ * region (Vercel, US East) is far from the database's (Supabase, Tokyo) — each
+ * round trip costs ~300-400ms, so a multi-item order can exceed 5s on latency alone.
+ */
+const TX_OPTIONS = { timeout: 20000, maxWait: 10000 };
+
 const COA_CODES = { cash: "1000", inventoryAsset: "1100", salesRevenue: "4000", cogs: "5000" };
 
 async function getAccountIds(tx: TxClient) {
@@ -127,7 +135,7 @@ export async function fulfillOrder(orderId: string, userId: string | null) {
     });
 
     return updated;
-  });
+  }, TX_OPTIONS);
 }
 
 /** Any status change should go through here so COMPLETED always triggers stock deduction + ledger posting. */
@@ -281,5 +289,5 @@ export async function voidOrder(orderId: string, reason: string, userId: string)
     });
 
     return updated;
-  });
+  }, TX_OPTIONS);
 }
