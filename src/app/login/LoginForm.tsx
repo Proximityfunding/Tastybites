@@ -19,6 +19,8 @@ export default function LoginForm({ callbackUrl }: { callbackUrl: string }) {
           type="email"
           required
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
           className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
         />
       </div>
