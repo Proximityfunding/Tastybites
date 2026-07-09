@@ -62,7 +62,7 @@ export default async function LandingPage() {
 
       <section className="mx-auto max-w-5xl px-4 py-14 text-center">
         <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-          Burgers, Shomai, Halo-Halo &amp; More
+          Burgers, Shomai, Milk Tea, Rice Meals &amp; More
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-gray-600">
           Order online for pickup or delivery, or visit us in-store at {branch.address}.
