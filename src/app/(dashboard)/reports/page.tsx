@@ -4,6 +4,13 @@ import { resolvePeriod } from "@/lib/period";
 import { formatCentavos } from "@/lib/money";
 import PeriodSelector from "../PeriodSelector";
 
+const PAYMENT_LABELS: Record<string, string> = {
+  CASH: "Cash",
+  GCASH: "GCash",
+  CARD: "Card",
+  UNPAID: "Unpaid",
+};
+
 export default async function ReportsPage({
   searchParams,
 }: {
@@ -32,6 +39,14 @@ export default async function ReportsPage({
     salesByChannel.set(o.channel, bucket);
   }
   const totalSales = orders.reduce((s, o) => s + o.total, 0);
+
+  const salesByPayment = new Map<string, { count: number; total: number }>();
+  for (const o of orders) {
+    const bucket = salesByPayment.get(o.paymentMethod) || { count: 0, total: 0 };
+    bucket.count += 1;
+    bucket.total += o.total;
+    salesByPayment.set(o.paymentMethod, bucket);
+  }
 
   const expenses = await db.expense.findMany({
     where: { branchId, date: { gte: from, lte: to } },
@@ -78,6 +93,33 @@ export default async function ReportsPage({
               {Array.from(salesByChannel.entries()).map(([channel, data]) => (
                 <tr key={channel} className="border-b border-gray-100">
                   <td className="py-2 pr-4 text-gray-900">{channel}</td>
+                  <td className="py-2 pr-4 text-gray-600">{data.count}</td>
+                  <td className="py-2 pr-4 text-gray-600">{formatCentavos(data.total)}</td>
+                </tr>
+              ))}
+              <tr className="font-semibold text-gray-900">
+                <td className="py-2 pr-4">Total</td>
+                <td className="py-2 pr-4">{orders.length}</td>
+                <td className="py-2 pr-4">{formatCentavos(totalSales)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h2 className="mb-2 text-lg font-semibold text-gray-900">Sales by Payment Method</h2>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 text-left text-gray-500">
+                <th className="py-2 pr-4">Payment</th>
+                <th className="py-2 pr-4">Orders</th>
+                <th className="py-2 pr-4">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from(salesByPayment.entries()).map(([method, data]) => (
+                <tr key={method} className="border-b border-gray-100">
+                  <td className="py-2 pr-4 text-gray-900">{PAYMENT_LABELS[method] || method}</td>
                   <td className="py-2 pr-4 text-gray-600">{data.count}</td>
                   <td className="py-2 pr-4 text-gray-600">{formatCentavos(data.total)}</td>
                 </tr>
