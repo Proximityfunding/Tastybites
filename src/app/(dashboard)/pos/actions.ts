@@ -51,5 +51,10 @@ export async function submitPOSOrder(input: {
   revalidatePath("/pos");
   revalidatePath("/customers");
 
-  return order.id;
+  const fullOrder = await db.order.findUniqueOrThrow({
+    where: { id: order.id },
+    include: { items: { include: { product: true } }, customer: true },
+  });
+
+  return fullOrder;
 }

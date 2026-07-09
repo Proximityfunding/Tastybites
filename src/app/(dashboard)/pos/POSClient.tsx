@@ -2,10 +2,12 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Printer, Plus } from "lucide-react";
 import { useCartStore } from "@/lib/cart";
 import { formatCentavos } from "@/lib/money";
 import { submitPOSOrder } from "./actions";
+import Receipt from "../orders/Receipt";
+import type { Order, OrderItem, Product as ProductModel, Customer } from "@prisma/client";
 
 type Product = {
   id: string;
@@ -14,6 +16,11 @@ type Product = {
   price: number;
   imageUrl: string | null;
   stock: number | null;
+};
+
+type CompletedOrder = Order & {
+  items: (OrderItem & { product: ProductModel })[];
+  customer: Customer | null;
 };
 
 const CATEGORY_PALETTE = [
@@ -61,9 +68,11 @@ function categoryEmoji(category: string) {
 
 export default function POSClient({
   products,
+  branch,
   defaultChannel = "DINE_IN",
 }: {
   products: Product[];
+  branch: { name: string; address: string | null; phone: string | null };
   defaultChannel?: "DINE_IN" | "WALK_IN" | "ONLINE";
 }) {
   const router = useRouter();
@@ -78,6 +87,12 @@ export default function POSClient({
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
+
+  function addItemToCart(product: { id: string; name: string; price: number }) {
+    if (completedOrder) setCompletedOrder(null);
+    addItem(product);
+  }
 
   const allCategories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), [products]);
 
@@ -107,7 +122,7 @@ export default function POSClient({
     }
     startTransition(async () => {
       try {
-        const orderId = await submitPOSOrder({
+        const order = await submitPOSOrder({
           channel,
           items: lines.map((l) => ({ productId: l.productId, qty: l.qty, modifiers: l.modifiers || null })),
           paymentMethod: complete ? paymentMethod : "UNPAID",
@@ -123,15 +138,24 @@ export default function POSClient({
         setCustomerName("");
         setCustomerPhone("");
         setNotes("");
-        router.push(`/orders/${orderId}`);
+        if (complete) {
+          setCompletedOrder(order);
+        } else {
+          router.push(`/orders/${order.id}`);
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to submit order");
       }
     });
   }
 
+  function startNewSale() {
+    setCompletedOrder(null);
+  }
+
   return (
-    <div className="flex gap-6">
+    <>
+    <div className="flex gap-6 print:hidden">
       <div className="flex-1">
         <div className="mb-4 space-y-3">
           <div className="relative">
@@ -199,7 +223,7 @@ export default function POSClient({
                     <button
                       key={p.id}
                       disabled={disabled}
-                      onClick={() => addItem({ id: p.id, name: p.name, price: p.price })}
+                      onClick={() => addItemToCart({ id: p.id, name: p.name, price: p.price })}
                       className={`group relative flex min-h-[128px] flex-col overflow-hidden rounded-xl border-2 p-3 text-left transition ${
                         disabled
                           ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-50 grayscale"
@@ -258,6 +282,42 @@ export default function POSClient({
         })}
       </div>
 
+      {completedOrder ? (
+        <div className="w-96 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 p-4 print:hidden">
+          <div className="mb-1 text-lg font-semibold text-emerald-900">Order Placed ✓</div>
+          <div className="mb-4 text-sm text-emerald-700">
+            Order #{completedOrder.id.slice(-6)} · {formatCentavos(completedOrder.total)}
+          </div>
+
+          <div className="mb-4 max-h-64 space-y-1 overflow-y-auto rounded-md bg-white p-3 text-sm">
+            {completedOrder.items.map((item) => (
+              <div key={item.id} className="flex justify-between text-gray-700">
+                <span>
+                  {item.qty}x {item.product.name}
+                </span>
+                <span>{formatCentavos(item.lineTotal)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <button
+              onClick={() => window.print()}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+            >
+              <Printer size={16} />
+              Print Receipt for Customer
+            </button>
+            <button
+              onClick={startNewSale}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <Plus size={16} />
+              Start New Sale
+            </button>
+          </div>
+        </div>
+      ) : (
       <div className="w-96 shrink-0 rounded-md border border-gray-200 bg-white p-4">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Order</h2>
 
@@ -387,6 +447,10 @@ export default function POSClient({
           </button>
         </div>
       </div>
+      )}
     </div>
+
+    {completedOrder && <Receipt order={completedOrder} branch={branch} />}
+    </>
   );
 }

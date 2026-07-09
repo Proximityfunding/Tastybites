@@ -1,23 +1,27 @@
 import { requirePageRole } from "@/lib/access";
 import { db } from "@/lib/db";
 import { computeAvailableStock } from "@/lib/stock";
+import { getDefaultBranch } from "@/lib/branch";
 import POSClient from "./POSClient";
 
 export default async function POSPage() {
   const user = await requirePageRole("OWNER_ADMIN", "CASHIER_STAFF");
 
-  const products = await db.product.findMany({
-    where: { branchId: user.branchId, isActive: true, isAvailable: true },
-    orderBy: [{ category: { sortOrder: "asc" } }, { category: { name: "asc" } }, { name: "asc" }],
-    select: {
-      id: true,
-      name: true,
-      price: true,
-      imageUrl: true,
-      category: { select: { name: true } },
-      recipe: { select: { quantity: true, ingredient: { select: { stockQty: true } } } },
-    },
-  });
+  const [products, branch] = await Promise.all([
+    db.product.findMany({
+      where: { branchId: user.branchId, isActive: true, isAvailable: true },
+      orderBy: [{ category: { sortOrder: "asc" } }, { category: { name: "asc" } }, { name: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: { select: { name: true } },
+        recipe: { select: { quantity: true, ingredient: { select: { stockQty: true } } } },
+      },
+    }),
+    getDefaultBranch(),
+  ]);
 
   return (
     <div>
@@ -31,6 +35,7 @@ export default async function POSPage() {
           category: p.category.name,
           stock: computeAvailableStock(p.recipe),
         }))}
+        branch={branch}
       />
     </div>
   );
