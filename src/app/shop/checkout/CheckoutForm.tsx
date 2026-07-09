@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { useCartStore } from "@/lib/cart";
 import { formatCentavos } from "@/lib/money";
@@ -9,6 +10,9 @@ import { submitCheckout } from "./actions";
 export default function CheckoutForm() {
   const { lines } = useCartStore();
   const [fulfillment, setFulfillment] = useState<"pickup" | "delivery">("pickup");
+  // Stable for the life of this form, including retries after a validation error, so repeated
+  // "Place Order" clicks (or a slow/retried submit) can never create more than one order.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const total = lines.reduce((sum, l) => sum + l.unitPrice * l.qty, 0);
 
@@ -52,6 +56,7 @@ export default function CheckoutForm() {
 
       <form action={submitCheckout} className="space-y-4">
         <input type="hidden" name="items" value={items} />
+        <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
         <div>
           <label className="block text-sm font-medium text-gray-700">Name</label>
           <input
@@ -110,13 +115,21 @@ export default function CheckoutForm() {
         <p className="text-xs text-gray-500">
           Payment is collected on {fulfillment === "pickup" ? "pickup" : "delivery"} (cash, GCash, or card).
         </p>
-        <button
-          type="submit"
-          className="w-full rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
-        >
-          Place Order
-        </button>
+        <PlaceOrderButton />
       </form>
     </div>
+  );
+}
+
+function PlaceOrderButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? "Placing Order…" : "Place Order"}
+    </button>
   );
 }

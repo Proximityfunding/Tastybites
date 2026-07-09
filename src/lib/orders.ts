@@ -171,8 +171,15 @@ export async function createOrder(opts: {
   isPickup?: boolean;
   createdById?: string | null;
   complete: boolean;
+  /** Repeated calls with the same key return the original order instead of creating a duplicate. */
+  idempotencyKey?: string | null;
 }) {
   if (opts.items.length === 0) throw new Error("Order must have at least one item");
+
+  if (opts.idempotencyKey) {
+    const existing = await db.order.findUnique({ where: { idempotencyKey: opts.idempotencyKey } });
+    if (existing) return existing;
+  }
 
   const products = await db.product.findMany({
     where: { id: { in: opts.items.map((i) => i.productId) } },
@@ -197,23 +204,35 @@ export async function createOrder(opts: {
   const discount = opts.discount ?? 0;
   const total = subtotal - discount;
 
-  const order = await db.order.create({
-    data: {
-      branchId: opts.branchId,
-      channel: opts.channel,
-      status: "PENDING",
-      customerId: opts.customerId ?? null,
-      subtotal,
-      discount,
-      total,
-      paymentMethod: opts.paymentMethod,
-      amountPaid: opts.amountPaid,
-      isPickup: opts.isPickup ?? false,
-      notes: opts.notes ?? null,
-      createdById: opts.createdById ?? null,
-      items: { create: orderItemsData },
-    },
-  });
+  let order;
+  try {
+    order = await db.order.create({
+      data: {
+        branchId: opts.branchId,
+        channel: opts.channel,
+        status: "PENDING",
+        customerId: opts.customerId ?? null,
+        subtotal,
+        discount,
+        total,
+        paymentMethod: opts.paymentMethod,
+        amountPaid: opts.amountPaid,
+        isPickup: opts.isPickup ?? false,
+        notes: opts.notes ?? null,
+        createdById: opts.createdById ?? null,
+        idempotencyKey: opts.idempotencyKey ?? null,
+        items: { create: orderItemsData },
+      },
+    });
+  } catch (err) {
+    // Two near-simultaneous submissions with the same key can both pass the check above;
+    // the loser hits the unique constraint here instead of creating a duplicate order.
+    if (opts.idempotencyKey && (err as { code?: string }).code === "P2002") {
+      const existing = await db.order.findUnique({ where: { idempotencyKey: opts.idempotencyKey } });
+      if (existing) return existing;
+    }
+    throw err;
+  }
 
   await logAudit({
     userId: opts.createdById ?? null,

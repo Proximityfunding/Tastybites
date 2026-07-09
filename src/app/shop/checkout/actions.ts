@@ -22,6 +22,8 @@ export async function submitCheckout(formData: FormData) {
   const items: CartItemInput[] = JSON.parse(itemsRaw);
   if (items.length === 0) throw new Error("Cart is empty");
 
+  const idempotencyKey = String(formData.get("idempotencyKey") || "").trim() || null;
+
   let customer = await db.customer.findFirst({ where: { branchId: branch.id, phone } });
   if (!customer) {
     customer = await db.customer.create({
@@ -39,6 +41,7 @@ export async function submitCheckout(formData: FormData) {
     notes,
     isPickup,
     complete: false,
+    idempotencyKey,
   });
 
   revalidatePath("/orders");

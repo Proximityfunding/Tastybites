@@ -224,6 +224,8 @@ model Order {
   isPickup      Boolean       @default(false)
   notes         String?
   voidReason    String?
+  /** Set by the online checkout form to prevent duplicate orders from repeated "Place Order" clicks. */
+  idempotencyKey String?      @unique
   createdById   String?
   createdBy     User?         @relation("OrderCreatedBy", fields: [createdById], references: [id])
   createdAt     DateTime      @default(now())
