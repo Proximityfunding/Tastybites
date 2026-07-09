@@ -59,6 +59,8 @@ export async function createProduct(formData: FormData) {
   });
 
   revalidatePath("/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
   redirect(`/products/${product.id}/edit`);
 }
 
@@ -110,6 +112,8 @@ export async function updateProduct(id: string, formData: FormData) {
   });
 
   revalidatePath("/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
   redirect("/products");
 }
 
@@ -126,4 +130,6 @@ export async function deleteProduct(id: string) {
   });
 
   revalidatePath("/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
 }

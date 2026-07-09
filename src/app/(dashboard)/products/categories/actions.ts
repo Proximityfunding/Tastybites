@@ -26,6 +26,8 @@ export async function createCategory(formData: FormData) {
 
   revalidatePath("/products/categories");
   revalidatePath("/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
   redirect("/products/categories");
 }
 
@@ -52,6 +54,7 @@ export async function updateCategory(id: string, formData: FormData) {
   revalidatePath("/products");
   revalidatePath("/pos");
   revalidatePath("/shop");
+  revalidatePath("/");
   redirect("/products/categories");
 }
 
@@ -75,4 +78,6 @@ export async function deleteCategory(id: string) {
 
   revalidatePath("/products/categories");
   revalidatePath("/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
 }
