@@ -88,6 +88,8 @@ export default function POSClient({
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
+  /** Cash received from the customer, in centavos. Only used when paymentMethod is CASH. */
+  const [amountTendered, setAmountTendered] = useState(0);
 
   function addItemToCart(product: { id: string; name: string; price: number }) {
     if (completedOrder) setCompletedOrder(null);
@@ -113,11 +115,20 @@ export default function POSClient({
 
   const subtotal = lines.reduce((sum, l) => sum + l.unitPrice * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
+  const change = paymentMethod === "CASH" ? amountTendered - total : 0;
 
   function submit(complete: boolean) {
     setError(null);
     if (lines.length === 0) {
       setError("Cart is empty");
+      return;
+    }
+    if (complete && paymentMethod === "CASH" && amountTendered < total) {
+      setError(
+        amountTendered === 0
+          ? "Enter the amount received from the customer"
+          : "Amount received is less than the total"
+      );
       return;
     }
     startTransition(async () => {
@@ -126,7 +137,7 @@ export default function POSClient({
           channel,
           items: lines.map((l) => ({ productId: l.productId, qty: l.qty, modifiers: l.modifiers || null })),
           paymentMethod: complete ? paymentMethod : "UNPAID",
-          amountPaid: complete ? total : 0,
+          amountPaid: complete ? (paymentMethod === "CASH" ? amountTendered : total) : 0,
           discount,
           notes: notes || null,
           customerName: customerName || null,
@@ -138,6 +149,7 @@ export default function POSClient({
         setCustomerName("");
         setCustomerPhone("");
         setNotes("");
+        setAmountTendered(0);
         if (complete) {
           setCompletedOrder(order);
         } else {
@@ -298,6 +310,22 @@ export default function POSClient({
                 <span>{formatCentavos(item.lineTotal)}</span>
               </div>
             ))}
+            <div className="mt-2 space-y-1 border-t border-gray-200 pt-2">
+              <div className="flex justify-between font-semibold text-gray-900">
+                <span>Total</span>
+                <span>{formatCentavos(completedOrder.total)}</span>
+              </div>
+              <div className="flex justify-between text-gray-700">
+                <span>Amount Paid ({completedOrder.paymentMethod})</span>
+                <span>{formatCentavos(completedOrder.amountPaid)}</span>
+              </div>
+              {completedOrder.paymentMethod === "CASH" && completedOrder.amountPaid > completedOrder.total && (
+                <div className="flex justify-between font-semibold text-emerald-700">
+                  <span>Change</span>
+                  <span>{formatCentavos(completedOrder.amountPaid - completedOrder.total)}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -426,6 +454,37 @@ export default function POSClient({
             <option value="GCASH">GCash</option>
             <option value="CARD">Card</option>
           </select>
+
+          {paymentMethod === "CASH" && (
+            <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+              <div className="flex items-center justify-between text-sm">
+                <label htmlFor="amount-received" className="font-medium text-gray-700">
+                  Amount Received (₱)
+                </label>
+                <input
+                  id="amount-received"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={amountTendered === 0 ? "" : amountTendered / 100}
+                  onChange={(e) => setAmountTendered(Math.round(Number(e.target.value) * 100))}
+                  placeholder="0.00"
+                  className="w-28 rounded border border-gray-300 px-2 py-1 text-right text-sm"
+                />
+              </div>
+              <div
+                className={`mt-2 flex justify-between text-sm font-semibold ${
+                  amountTendered === 0 ? "text-gray-400" : change < 0 ? "text-red-600" : "text-emerald-700"
+                }`}
+              >
+                <span>Change</span>
+                <span>{amountTendered > 0 ? formatCentavos(Math.max(0, change)) : "—"}</span>
+              </div>
+              {amountTendered > 0 && change < 0 && (
+                <p className="mt-1 text-xs text-red-600">Short by {formatCentavos(-change)}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
