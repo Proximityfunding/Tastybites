@@ -446,11 +446,71 @@ export default function POSClient({
             Complete Sale
           </button>
         </div>
+
+        <button
+          disabled={lines.length === 0}
+          onClick={() => window.print()}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Printer size={16} />
+          Print Order
+        </button>
       </div>
       )}
     </div>
 
-    {completedOrder && <Receipt order={completedOrder} branch={branch} />}
+    {completedOrder ? (
+      <Receipt order={completedOrder} branch={branch} />
+    ) : (
+      lines.length > 0 && <OrderSlip lines={lines} channel={channel} customerName={customerName} />
+    )}
     </>
+  );
+}
+
+const CHANNEL_LABEL: Record<string, string> = {
+  DINE_IN: "Dine-in",
+  WALK_IN: "Walk-in",
+  ONLINE: "Online",
+};
+
+/** Print-only order slip for the current (unsubmitted) cart, styled after the KDS order card. */
+function OrderSlip({
+  lines,
+  channel,
+  customerName,
+}: {
+  lines: { productId: string; name: string; qty: number; modifiers: string }[];
+  channel: string;
+  customerName: string;
+}) {
+  return (
+    <div className="hidden print:block">
+      <div className="mx-auto w-full max-w-xs text-sm text-black">
+        {customerName && <div className="text-lg font-bold">{customerName}</div>}
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-lg font-extrabold">Order</span>
+          <span className="rounded-full border border-black px-2 py-0.5 text-xs font-medium">
+            {CHANNEL_LABEL[channel] || channel}
+          </span>
+        </div>
+
+        <div className="space-y-1">
+          {lines.map((l) => (
+            <div key={l.productId}>
+              <div className="font-semibold">
+                {l.qty}× {l.name}
+              </div>
+              {l.modifiers && <div className="pl-4 text-xs italic text-gray-600">{l.modifiers}</div>}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+          <span>just now</span>
+          <span>{new Date().toLocaleTimeString()}</span>
+        </div>
+      </div>
+    </div>
   );
 }
