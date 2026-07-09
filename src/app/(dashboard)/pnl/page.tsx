@@ -1,4 +1,4 @@
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { resolvePeriod } from "@/lib/period";
 import { formatCentavos } from "@/lib/money";
@@ -14,7 +14,7 @@ export default async function PnLPage({
   searchParams: Promise<{ period?: string; from?: string; to?: string }>;
 }) {
   const sp = await searchParams;
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("pnl");
   const { period, from, to } = resolvePeriod(sp);
   const branchId = user.branchId;
 

@@ -1,4 +1,4 @@
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { STATUS_LABELS, KITCHEN_NEXT_STATUS, KDS_ACTIVE_STATUSES } from "@/lib/orderStatus";
 import { changeOrderStatus } from "../orders/actions";
@@ -29,7 +29,7 @@ function urgencyClasses(minutes: number) {
 }
 
 export default async function KitchenDisplayPage() {
-  const user = await requirePageRole("OWNER_ADMIN", "CASHIER_STAFF", "KITCHEN");
+  const user = await requirePagePermission("kitchen");
 
   const orders = await db.order.findMany({
     where: { branchId: user.branchId, status: { in: KDS_ACTIVE_STATUSES } },

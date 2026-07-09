@@ -1,5 +1,5 @@
 import { FormField, FormSelect, SubmitButton } from "@/components/FormField";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { createExpense } from "../actions";
 
 const CATEGORY_OPTIONS = [
@@ -12,7 +12,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default async function NewExpensePage() {
-  await requirePageRole("OWNER_ADMIN");
+  await requirePagePermission("expenses");
   const today = new Date().toISOString().slice(0, 10);
 
   return (

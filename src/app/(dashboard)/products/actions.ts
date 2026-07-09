@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/access";
+import { requirePermission } from "@/lib/access";
 import { pesosToCentavos } from "@/lib/money";
 import { slugify } from "@/lib/slug";
 import { saveUploadedFile } from "@/lib/upload";
@@ -22,7 +22,7 @@ function parseRecipe(formData: FormData) {
 }
 
 export async function createProduct(formData: FormData) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("products");
   const name = String(formData.get("name") || "").trim();
   const categoryId = String(formData.get("categoryId") || "").trim();
   const cost = Number(formData.get("cost") || 0);
@@ -63,7 +63,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("products");
   const name = String(formData.get("name") || "").trim();
   const categoryId = String(formData.get("categoryId") || "").trim();
   const cost = Number(formData.get("cost") || 0);
@@ -114,7 +114,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("products");
   const product = await db.product.update({ where: { id }, data: { isActive: false, isAvailable: false } });
 
   await logAudit({

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { FormField, SubmitButton } from "@/components/FormField";
 import { createCategory, deleteCategory } from "./actions";
 
 export default async function CategoriesPage() {
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("products");
 
   const categories = await db.category.findMany({
     where: { branchId: user.branchId },

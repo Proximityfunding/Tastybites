@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { recordStockMovement } from "./actions";
 import { FormSelect, FormField, SubmitButton } from "@/components/FormField";
 
 export default async function InventoryPage() {
+  await requirePagePermission("inventory");
   const session = await auth();
   const branchId = session!.user.branchId;
   const isOwner = session!.user.role === "OWNER_ADMIN";

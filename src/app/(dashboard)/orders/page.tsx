@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import AutoRefresh from "@/components/AutoRefresh";
@@ -13,6 +14,7 @@ export default async function OrdersPage({
 }: {
   searchParams: Promise<{ status?: string; channel?: string }>;
 }) {
+  await requirePagePermission("orders");
   const session = await auth();
   const { status, channel } = await searchParams;
   const isKitchen = session!.user.role === "KITCHEN";

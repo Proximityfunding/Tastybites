@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { db } from "@/lib/db";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { deleteProduct } from "./actions";
 
@@ -21,7 +21,7 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{ q?: string; categoryId?: string; sort?: string; dir?: string }>;
 }) {
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("products");
   const { q, categoryId, sort, dir } = await searchParams;
   const sortField: SortField = (["name", "category", "cost", "price", "margin", "status"] as const).includes(
     sort as SortField

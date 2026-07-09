@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/access";
+import { requireStaff, hasPermission, AccessError } from "@/lib/access";
 import { createOrder, type CartItemInput } from "@/lib/orders";
 import type { OrderChannel, PaymentMethod } from "@prisma/client";
 
+/** Shared by POS ("pos" permission) and Quick Order Entry ("orders" permission). */
 export async function submitPOSOrder(input: {
   channel: OrderChannel;
   items: CartItemInput[];
@@ -17,7 +18,10 @@ export async function submitPOSOrder(input: {
   customerName?: string | null;
   complete: boolean;
 }) {
-  const user = await requireRole("OWNER_ADMIN", "CASHIER_STAFF");
+  const user = await requireStaff();
+  if (!(await hasPermission(user.role, "pos")) && !(await hasPermission(user.role, "orders"))) {
+    throw new AccessError("Requires permission: pos or orders");
+  }
 
   let customerId: string | null = null;
   const phone = input.customerPhone?.trim();

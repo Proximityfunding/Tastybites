@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/db";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { centavosToPesos, formatCentavos } from "@/lib/money";
 import { FormField, FormSelect, FormTextArea, SubmitButton } from "@/components/FormField";
 import RecipeInput from "../../RecipeInput";
 import { updateProduct } from "../../actions";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePageRole("OWNER_ADMIN");
+  await requirePagePermission("products");
   const { id } = await params;
   const product = await db.product.findUnique({
     where: { id },

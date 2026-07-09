@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/access";
+import { requirePermission } from "@/lib/access";
 import { logAudit } from "@/lib/audit";
 
 function parseTags(formData: FormData): string[] {
@@ -15,7 +15,7 @@ function parseTags(formData: FormData): string[] {
 }
 
 export async function createCustomer(formData: FormData) {
-  const user = await requireStaff();
+  const user = await requirePermission("customers");
   const name = String(formData.get("name") || "").trim();
   if (!name) throw new Error("Name is required");
 
@@ -43,7 +43,7 @@ export async function createCustomer(formData: FormData) {
 }
 
 export async function updateCustomer(id: string, formData: FormData) {
-  const user = await requireStaff();
+  const user = await requirePermission("customers");
   const name = String(formData.get("name") || "").trim();
   if (!name) throw new Error("Name is required");
 

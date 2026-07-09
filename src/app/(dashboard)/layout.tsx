@@ -1,16 +1,18 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { getAllowedPermissions } from "@/lib/access";
 import Sidebar from "./Sidebar";
 import { logout } from "./actions";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const allowedPermissions = await getAllowedPermissions(session.user.role);
 
   return (
     <div className="flex min-h-screen bg-gray-50 print:block print:bg-white">
       <div className="print:hidden">
-        <Sidebar role={session.user.role} />
+        <Sidebar role={session.user.role} allowedPermissions={allowedPermissions} />
       </div>
       <div className="flex-1">
         <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3 print:hidden">

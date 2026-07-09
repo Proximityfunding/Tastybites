@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/access";
+import { requirePermission } from "@/lib/access";
 import { pesosToCentavos } from "@/lib/money";
 import { updateOrderStatus } from "@/lib/orders";
 import { saveUploadedFile } from "@/lib/upload";
@@ -11,7 +11,7 @@ import { logAudit } from "@/lib/audit";
 import type { DeliveryStatus } from "@prisma/client";
 
 export async function createDelivery(formData: FormData) {
-  const user = await requireStaff();
+  const user = await requirePermission("deliveries");
   const orderId = String(formData.get("orderId") || "");
   const status = String(formData.get("status") || "PENDING") as DeliveryStatus;
   if (!orderId) throw new Error("orderId is required");
@@ -43,7 +43,7 @@ export async function createDelivery(formData: FormData) {
 }
 
 export async function updateDelivery(id: string, formData: FormData) {
-  const user = await requireStaff();
+  const user = await requirePermission("deliveries");
   const existing = await db.delivery.findUniqueOrThrow({ where: { id } });
   const status = String(formData.get("status") || existing.status) as DeliveryStatus;
 

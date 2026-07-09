@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/access";
+import { requirePermission } from "@/lib/access";
 import { logAudit } from "@/lib/audit";
 
 function fieldOrNull(formData: FormData, name: string) {
@@ -12,7 +12,7 @@ function fieldOrNull(formData: FormData, name: string) {
 }
 
 export async function createSupplier(formData: FormData) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("suppliers");
   const name = String(formData.get("name") || "").trim();
   if (!name) throw new Error("Name is required");
 
@@ -40,7 +40,7 @@ export async function createSupplier(formData: FormData) {
 }
 
 export async function updateSupplier(id: string, formData: FormData) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("suppliers");
   const name = String(formData.get("name") || "").trim();
   if (!name) throw new Error("Name is required");
 
@@ -71,7 +71,7 @@ export async function updateSupplier(id: string, formData: FormData) {
 }
 
 export async function deleteSupplier(id: string) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("suppliers");
   const supplier = await db.supplier.delete({ where: { id } });
 
   await logAudit({

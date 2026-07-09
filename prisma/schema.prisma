@@ -374,3 +374,21 @@ model AuditLog {
 
   @@index([entityType, entityId])
 }
+
+/**
+ * Editable per-role permission grants (see src/lib/permissions.ts for the
+ * fixed set of permission keys). OWNER_ADMIN is always fully granted in code
+ * regardless of what's stored here — a safety rail so misconfiguration can
+ * never lock the owner out. A handful of especially sensitive actions (user
+ * management, audit log, voiding orders) are hardcoded owner-only and never
+ * read from this table at all.
+ */
+model RolePermission {
+  id         String   @id @default(cuid())
+  role       Role
+  permission String
+  allowed    Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([role, permission])
+}

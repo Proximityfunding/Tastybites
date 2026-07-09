@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { FormField, FormSelect, FormTextArea, SubmitButton } from "@/components/FormField";
 import RecipeInput from "../RecipeInput";
 import { createProduct } from "../actions";
 
 export default async function NewProductPage() {
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("products");
   const [ingredients, categories] = await Promise.all([
     db.ingredient.findMany({ where: { branchId: user.branchId }, orderBy: { name: "asc" } }),
     db.category.findMany({ where: { branchId: user.branchId }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),

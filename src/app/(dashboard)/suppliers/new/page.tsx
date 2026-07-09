@@ -1,9 +1,9 @@
 import { FormField, SubmitButton } from "@/components/FormField";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { createSupplier } from "../actions";
 
 export default async function NewSupplierPage() {
-  await requirePageRole("OWNER_ADMIN");
+  await requirePagePermission("suppliers");
   return (
     <div className="max-w-lg">
       <h1 className="mb-4 text-2xl font-semibold text-gray-900">Add Supplier</h1>

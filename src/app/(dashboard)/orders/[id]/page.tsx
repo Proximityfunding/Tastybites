@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { getDefaultBranch } from "@/lib/branch";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
@@ -10,6 +11,7 @@ import PrintReceiptButton from "../PrintReceiptButton";
 import Receipt from "../Receipt";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePagePermission("orders");
   const { id } = await params;
   const session = await auth();
   const [order, branch] = await Promise.all([

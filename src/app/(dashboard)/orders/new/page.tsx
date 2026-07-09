@@ -1,11 +1,11 @@
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { computeAvailableStock } from "@/lib/stock";
 import { getDefaultBranch } from "@/lib/branch";
 import POSClient from "../../pos/POSClient";
 
 export default async function QuickOrderEntryPage() {
-  const user = await requirePageRole("OWNER_ADMIN", "CASHIER_STAFF");
+  const user = await requirePagePermission("orders");
   const [products, branch] = await Promise.all([
     db.product.findMany({
       where: { branchId: user.branchId, isActive: true, isAvailable: true },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/access";
+import { requirePermission } from "@/lib/access";
 import { centavosToPesos } from "@/lib/money";
 
 function toCsv(rows: (string | number)[][]): string {
@@ -8,7 +8,7 @@ function toCsv(rows: (string | number)[][]): string {
 }
 
 export async function GET(req: NextRequest) {
-  const user = await requireRole("OWNER_ADMIN");
+  const user = await requirePermission("reports");
 
   const { searchParams } = req.nextUrl;
   const type = searchParams.get("type");

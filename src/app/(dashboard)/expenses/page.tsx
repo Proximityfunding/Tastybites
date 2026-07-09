@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Package, Home, Zap, Users, Truck, CircleEllipsis } from "lucide-react";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
 import { generateDueRecurringExpenses } from "@/lib/expenses";
@@ -16,7 +16,7 @@ const CATEGORY_STYLE: Record<string, { color: StatCardColor; icon: typeof Packag
 };
 
 export default async function ExpensesPage() {
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("expenses");
   const branchId = user.branchId;
 
   await generateDueRecurringExpenses(branchId, user.id);

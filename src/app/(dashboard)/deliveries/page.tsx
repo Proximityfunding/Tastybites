@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Truck, Timer, Wallet } from "lucide-react";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import StatCard from "@/components/StatCard";
 
 const ON_TIME_SLA_MINUTES = 60;
 
 export default async function DeliveriesPage() {
+  await requirePagePermission("deliveries");
   const session = await auth();
   const deliveries = await db.delivery.findMany({
     where: { order: { branchId: session!.user.branchId } },

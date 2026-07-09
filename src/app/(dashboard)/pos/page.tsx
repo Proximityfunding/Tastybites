@@ -1,11 +1,11 @@
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { computeAvailableStock } from "@/lib/stock";
 import { getDefaultBranch } from "@/lib/branch";
 import POSClient from "./POSClient";
 
 export default async function POSPage() {
-  const user = await requirePageRole("OWNER_ADMIN", "CASHIER_STAFF");
+  const user = await requirePagePermission("pos");
 
   const [products, branch] = await Promise.all([
     db.product.findMany({

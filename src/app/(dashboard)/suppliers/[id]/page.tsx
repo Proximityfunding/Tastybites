@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { FormField, SubmitButton } from "@/components/FormField";
 import { updateSupplier } from "../actions";
 
 export default async function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePageRole("OWNER_ADMIN");
+  await requirePagePermission("suppliers");
   const { id } = await params;
   const supplier = await db.supplier.findUnique({
     where: { id },

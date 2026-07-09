@@ -14,12 +14,20 @@ export default async function UsersPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
-        <Link
-          href="/users/new"
-          className="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
-        >
-          Add User
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/users/roles"
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            Manage Roles
+          </Link>
+          <Link
+            href="/users/new"
+            className="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+          >
+            Add User
+          </Link>
+        </div>
       </div>
       <table className="w-full border-collapse text-sm">
         <thead>

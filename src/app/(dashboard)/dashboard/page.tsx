@@ -2,12 +2,14 @@ import Link from "next/link";
 import { TrendingUp, PackageX, Truck, Receipt, Users, Repeat } from "lucide-react";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { getPeakHoursHeatmap, getBestSellers, getCustomerInsights } from "@/lib/analytics";
 import StatCard from "@/components/StatCard";
 import PeakHoursHeatmap from "./PeakHoursHeatmap";
 
 export default async function DashboardPage() {
+  await requirePagePermission("dashboard");
   const session = await auth();
   const branchId = session!.user.branchId;
   const role = session!.user.role;

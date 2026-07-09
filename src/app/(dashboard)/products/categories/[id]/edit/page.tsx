@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { FormField, SubmitButton } from "@/components/FormField";
 import { updateCategory } from "../../actions";
 
 export default async function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePageRole("OWNER_ADMIN");
+  await requirePagePermission("products");
   const { id } = await params;
   const category = await db.category.findUnique({ where: { id } });
   if (!category) notFound();

@@ -1,7 +1,9 @@
 import { FormField, SubmitButton } from "@/components/FormField";
+import { requirePagePermission } from "@/lib/access";
 import { createCustomer } from "../actions";
 
-export default function NewCustomerPage() {
+export default async function NewCustomerPage() {
+  await requirePagePermission("customers");
   return (
     <div className="max-w-lg">
       <h1 className="mb-4 text-2xl font-semibold text-gray-900">Add Customer</h1>

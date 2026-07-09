@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 
 export default async function CustomersPage({
@@ -8,6 +9,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  await requirePagePermission("customers");
   const session = await auth();
   const { q } = await searchParams;
 

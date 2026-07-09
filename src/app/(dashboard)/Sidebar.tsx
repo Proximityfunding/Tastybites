@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Role } from "@prisma/client";
+import type { PermissionKey } from "@/lib/permissions";
 import Logo from "@/components/Logo";
 import {
   LayoutDashboard,
@@ -27,49 +28,33 @@ const ICON_COLOR = {
   gray: "text-gray-400",
 } as const;
 
+/**
+ * `permission` items are governed by the dynamic Role Management matrix (src/lib/permissions.ts).
+ * `roles` items (Users, Audit Trail) are always hardcoded OWNER_ADMIN-only — a safety rail so a
+ * misconfigured matrix can never hide the screen that fixes the matrix.
+ */
 const NAV = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    color: "orange",
-    roles: ["OWNER_ADMIN", "CASHIER_STAFF", "KITCHEN"],
-  },
-  { href: "/pos", label: "POS", icon: ShoppingCart, color: "green", roles: ["OWNER_ADMIN", "CASHIER_STAFF"] },
-  {
-    href: "/orders",
-    label: "Orders",
-    icon: ClipboardList,
-    color: "blue",
-    roles: ["OWNER_ADMIN", "CASHIER_STAFF"],
-  },
-  {
-    href: "/kitchen",
-    label: "Kitchen Display",
-    icon: ChefHat,
-    color: "red",
-    roles: ["OWNER_ADMIN", "CASHIER_STAFF", "KITCHEN"],
-  },
-  { href: "/inventory", label: "Inventory", icon: Boxes, color: "amber", roles: ["OWNER_ADMIN", "CASHIER_STAFF"] },
-  { href: "/products", label: "Products", icon: UtensilsCrossed, color: "purple", roles: ["OWNER_ADMIN"] },
-  { href: "/suppliers", label: "Suppliers", icon: Truck, color: "gray", roles: ["OWNER_ADMIN"] },
-  { href: "/deliveries", label: "Deliveries", icon: Truck, color: "blue", roles: ["OWNER_ADMIN", "CASHIER_STAFF"] },
-  { href: "/expenses", label: "Expenses", icon: Receipt, color: "red", roles: ["OWNER_ADMIN"] },
-  { href: "/reports", label: "Reports", icon: BarChart3, color: "purple", roles: ["OWNER_ADMIN"] },
-  { href: "/pnl", label: "P&L", icon: BarChart3, color: "green", roles: ["OWNER_ADMIN"] },
-  {
-    href: "/customers",
-    label: "Customers",
-    icon: Contact,
-    color: "orange",
-    roles: ["OWNER_ADMIN", "CASHIER_STAFF"],
-  },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, color: "orange", permission: "dashboard" },
+  { href: "/pos", label: "POS", icon: ShoppingCart, color: "green", permission: "pos" },
+  { href: "/orders", label: "Orders", icon: ClipboardList, color: "blue", permission: "orders" },
+  { href: "/kitchen", label: "Kitchen Display", icon: ChefHat, color: "red", permission: "kitchen" },
+  { href: "/inventory", label: "Inventory", icon: Boxes, color: "amber", permission: "inventory" },
+  { href: "/products", label: "Products", icon: UtensilsCrossed, color: "purple", permission: "products" },
+  { href: "/suppliers", label: "Suppliers", icon: Truck, color: "gray", permission: "suppliers" },
+  { href: "/deliveries", label: "Deliveries", icon: Truck, color: "blue", permission: "deliveries" },
+  { href: "/expenses", label: "Expenses", icon: Receipt, color: "red", permission: "expenses" },
+  { href: "/reports", label: "Reports", icon: BarChart3, color: "purple", permission: "reports" },
+  { href: "/pnl", label: "P&L", icon: BarChart3, color: "green", permission: "pnl" },
+  { href: "/customers", label: "Customers", icon: Contact, color: "orange", permission: "customers" },
   { href: "/users", label: "Users", icon: UserCog, color: "gray", roles: ["OWNER_ADMIN"] },
   { href: "/audit", label: "Audit Trail", icon: History, color: "gray", roles: ["OWNER_ADMIN"] },
 ] as const;
 
-export default function Sidebar({ role }: { role: Role }) {
-  const items = NAV.filter((item) => (item.roles as readonly string[]).includes(role));
+export default function Sidebar({ role, allowedPermissions }: { role: Role; allowedPermissions: PermissionKey[] }) {
+  const allowedSet = new Set<string>(allowedPermissions);
+  const items = NAV.filter((item) =>
+    "permission" in item ? allowedSet.has(item.permission) : (item.roles as readonly string[]).includes(role)
+  );
 
   return (
     <nav className="flex h-full w-56 flex-col gap-1 border-r border-gray-200 bg-white p-3">

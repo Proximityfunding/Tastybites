@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos, centavosToPesos } from "@/lib/money";
 import { FormField, FormSelect, SubmitButton } from "@/components/FormField";
 import { updateDelivery } from "../actions";
 
 export default async function DeliveryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePagePermission("deliveries");
   const { id } = await params;
   const delivery = await db.delivery.findUnique({
     where: { id },

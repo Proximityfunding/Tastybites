@@ -6,9 +6,11 @@ import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/orderStatus";
 import { FormField, SubmitButton } from "@/components/FormField";
 import StatCard from "@/components/StatCard";
+import { requirePagePermission } from "@/lib/access";
 import { updateCustomer } from "../actions";
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePagePermission("customers");
   const { id } = await params;
   const customer = await db.customer.findUnique({
     where: { id },

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requirePageRole } from "@/lib/access";
+import { requirePagePermission } from "@/lib/access";
 import { deleteSupplier } from "./actions";
 
 export default async function SuppliersPage() {
-  const user = await requirePageRole("OWNER_ADMIN");
+  const user = await requirePagePermission("suppliers");
   const suppliers = await db.supplier.findMany({
     where: { branchId: user.branchId },
     orderBy: { name: "asc" },

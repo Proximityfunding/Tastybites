@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { PERMISSIONS, DEFAULT_GRANTS, EDITABLE_ROLES } from "../src/lib/permissions";
 
 try {
   process.loadEnvFile();
@@ -232,6 +233,16 @@ async function main() {
         where: { productId_ingredientId: { productId: record.id, ingredientId } },
         update: { quantity: ri.qty },
         create: { productId: record.id, ingredientId, quantity: ri.qty },
+      });
+    }
+  }
+
+  for (const { key } of PERMISSIONS) {
+    for (const role of EDITABLE_ROLES) {
+      await db.rolePermission.upsert({
+        where: { role_permission: { role, permission: key } },
+        update: {},
+        create: { role, permission: key, allowed: DEFAULT_GRANTS[key].includes(role) },
       });
     }
   }

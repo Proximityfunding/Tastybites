@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { FormField, FormSelect, SubmitButton } from "@/components/FormField";
 import { createDelivery } from "../actions";
@@ -9,6 +10,7 @@ export default async function NewDeliveryPage({
 }: {
   searchParams: Promise<{ orderId?: string }>;
 }) {
+  await requirePagePermission("deliveries");
   const { orderId } = await searchParams;
   if (!orderId) notFound();
 
