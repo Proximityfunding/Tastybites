@@ -8,6 +8,7 @@ import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import { changeOrderStatus, voidOrderAction } from "../actions";
 import PrintReceiptButton from "../PrintReceiptButton";
+import RecordPaymentButton from "../RecordPaymentButton";
 import Receipt from "../Receipt";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -114,6 +115,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               Mark {STATUS_LABELS[next]}
             </button>
           </form>
+        )}
+        {order.status === "COMPLETED" && order.paymentMethod === "UNPAID" && (
+          <RecordPaymentButton orderId={order.id} total={order.total} />
         )}
         {order.channel === "ONLINE" && !order.isPickup && !order.delivery && order.status !== "VOIDED" && (
           <Link href={`/deliveries/new?orderId=${order.id}`} className="text-sm text-orange-600 hover:underline">
