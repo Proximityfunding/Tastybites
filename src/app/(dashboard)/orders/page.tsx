@@ -5,9 +5,15 @@ import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import AutoRefresh from "@/components/AutoRefresh";
-import VoidOrderButton from "./VoidOrderButton";
+import RecordPaymentButton from "./RecordPaymentButton";
 import { changeOrderStatus } from "./actions";
 import type { OrderStatus } from "@prisma/client";
+
+const PAYMENT_LABELS: Record<string, string> = {
+  CASH: "Cash",
+  GCASH: "GCash",
+  CARD: "Card",
+};
 
 export default async function OrdersPage({
   searchParams,
@@ -18,7 +24,6 @@ export default async function OrdersPage({
   const session = await auth();
   const { status, channel } = await searchParams;
   const isKitchen = session!.user.role === "KITCHEN";
-  const isOwner = session!.user.role === "OWNER_ADMIN";
 
   const orders = await db.order.findMany({
     where: {
@@ -72,6 +77,7 @@ export default async function OrdersPage({
             <th className="py-2 pr-4">Status</th>
             <th className="py-2 pr-4">Customer</th>
             <th className="py-2 pr-4" />
+            <th className="py-2 pr-4">Payment</th>
           </tr>
         </thead>
         <tbody>
@@ -95,23 +101,31 @@ export default async function OrdersPage({
                 </td>
                 <td className="py-2 pr-4 text-gray-600">{order.customer?.name || "—"}</td>
                 <td className="py-2 pr-4">
-                  <div className="flex items-center gap-3">
-                    {next && (
-                      <form action={changeOrderStatus.bind(null, order.id, next)} className="inline">
-                        <button type="submit" className="text-orange-600 hover:underline">
-                          Mark {STATUS_LABELS[next]}
-                        </button>
-                      </form>
-                    )}
-                    {isOwner && order.status !== "VOIDED" && <VoidOrderButton orderId={order.id} />}
-                  </div>
+                  {next && (
+                    <form action={changeOrderStatus.bind(null, order.id, next)} className="inline">
+                      <button type="submit" className="text-orange-600 hover:underline">
+                        Mark {STATUS_LABELS[next]}
+                      </button>
+                    </form>
+                  )}
+                </td>
+                <td className="py-2 pr-4">
+                  {order.paymentMethod !== "UNPAID" ? (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      {PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}
+                    </span>
+                  ) : order.status === "COMPLETED" && !isKitchen ? (
+                    <RecordPaymentButton orderId={order.id} total={order.total} />
+                  ) : (
+                    <span className="text-xs text-gray-400">Unpaid</span>
+                  )}
                 </td>
               </tr>
             );
           })}
           {orders.length === 0 && (
             <tr>
-              <td colSpan={7} className="py-4 text-center text-gray-400">
+              <td colSpan={8} className="py-4 text-center text-gray-400">
                 No orders found.
               </td>
             </tr>
