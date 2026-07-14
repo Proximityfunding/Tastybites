@@ -7,9 +7,10 @@ import { getDefaultBranch } from "@/lib/branch";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import { changeOrderStatus, voidOrderAction } from "../actions";
-import PrintReceiptButton from "../PrintReceiptButton";
+import PrintControls from "../PrintControls";
 import RecordPaymentButton from "../RecordPaymentButton";
 import Receipt from "../Receipt";
+import OrderSlip from "../OrderSlip";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePagePermission("orders");
@@ -30,11 +31,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="max-w-2xl">
-      <Receipt order={order} branch={branch} />
-
-      <div className="mb-4 flex items-center justify-between print:hidden">
-        <h1 className="text-2xl font-semibold text-gray-900">Order #{order.id.slice(-6)}</h1>
-        <PrintReceiptButton />
+      <div className="mb-4 flex items-center justify-between print:mb-0 print:block">
+        <h1 className="text-2xl font-semibold text-gray-900 print:hidden">Order #{order.id.slice(-6)}</h1>
+        <PrintControls
+          receipt={<Receipt order={order} branch={branch} />}
+          slip={<OrderSlip order={order} />}
+        />
       </div>
 
       <div className="rounded-md border border-gray-200 bg-white p-6 print:hidden">
