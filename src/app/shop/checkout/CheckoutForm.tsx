@@ -7,9 +7,16 @@ import { useCartStore } from "@/lib/cart";
 import { formatCentavos } from "@/lib/money";
 import { submitCheckout } from "./actions";
 
-export default function CheckoutForm() {
+export default function CheckoutForm({
+  gcashNumber,
+  gcashName,
+}: {
+  gcashNumber: string | null;
+  gcashName: string;
+}) {
   const { lines } = useCartStore();
   const [fulfillment, setFulfillment] = useState<"pickup" | "delivery">("pickup");
+  const [paymentType, setPaymentType] = useState<"cod" | "gcash">("cod");
   // Stable for the life of this form, including retries after a validation error, so repeated
   // "Place Order" clicks (or a slow/retried submit) can never create more than one order.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
@@ -112,9 +119,65 @@ export default function CheckoutForm() {
           <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
           <input name="notes" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
         </div>
-        <p className="text-xs text-gray-500">
-          Payment is collected on {fulfillment === "pickup" ? "pickup" : "delivery"} (cash, GCash, or card).
-        </p>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Payment</label>
+          <div className="mt-1 flex gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="paymentType"
+                value="cod"
+                checked={paymentType === "cod"}
+                onChange={() => setPaymentType("cod")}
+              />
+              Cash on {fulfillment === "pickup" ? "Pickup" : "Delivery"} (COD)
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="paymentType"
+                value="gcash"
+                checked={paymentType === "gcash"}
+                onChange={() => setPaymentType("gcash")}
+              />
+              GCash (E-wallet)
+            </label>
+          </div>
+        </div>
+
+        {paymentType === "gcash" ? (
+          <div className="rounded-md border border-sky-200 bg-sky-50 p-4">
+            <p className="text-sm font-semibold text-sky-900">Pay with GCash</p>
+            <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-sky-800">
+              <li>
+                Send <span className="font-bold">{formatCentavos(total)}</span> to{" "}
+                <span className="font-bold">{gcashNumber || "the store's GCash number"}</span> ({gcashName})
+              </li>
+              <li>Copy the reference number from your GCash receipt</li>
+              <li>Enter it below to place your order</li>
+            </ol>
+            <label className="mt-3 block text-sm font-medium text-sky-900">
+              GCash Reference No.
+              <input
+                name="gcashReference"
+                required
+                minLength={4}
+                placeholder="e.g. 9021 XXX XXXX"
+                className="mt-1 w-full rounded-md border border-sky-300 bg-white px-3 py-2 text-sm"
+              />
+            </label>
+            <p className="mt-2 text-xs text-sky-700">
+              Your order will not be placed without a valid reference number. We verify every payment before
+              preparing the order.
+            </p>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-500">
+            Payment is collected on {fulfillment === "pickup" ? "pickup" : "delivery"} (cash, GCash, or card).
+          </p>
+        )}
+
         <PlaceOrderButton />
       </form>
     </div>

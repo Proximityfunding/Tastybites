@@ -173,6 +173,8 @@ export async function createOrder(opts: {
   complete: boolean;
   /** Repeated calls with the same key return the original order instead of creating a duplicate. */
   idempotencyKey?: string | null;
+  /** E-wallet transaction reference from the customer (e.g. GCash ref no.), kept for staff verification. */
+  paymentReference?: string | null;
 }) {
   if (opts.items.length === 0) throw new Error("Order must have at least one item");
 
@@ -221,6 +223,7 @@ export async function createOrder(opts: {
         notes: opts.notes ?? null,
         createdById: opts.createdById ?? null,
         idempotencyKey: opts.idempotencyKey ?? null,
+        paymentReference: opts.paymentReference ?? null,
         items: { create: orderItemsData },
       },
     });

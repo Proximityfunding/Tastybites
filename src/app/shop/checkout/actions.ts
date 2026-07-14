@@ -24,6 +24,14 @@ export async function submitCheckout(formData: FormData) {
 
   const idempotencyKey = String(formData.get("idempotencyKey") || "").trim() || null;
 
+  // COD pays on pickup/delivery; GCash must supply the e-wallet transaction reference
+  // as proof of payment — without it the order is rejected outright.
+  const paymentType = formData.get("paymentType") === "gcash" ? "gcash" : "cod";
+  const gcashReference = String(formData.get("gcashReference") || "").trim();
+  if (paymentType === "gcash" && gcashReference.length < 4) {
+    throw new Error("Your GCash payment reference number is required to place this order");
+  }
+
   let customer = await db.customer.findFirst({ where: { branchId: branch.id, phone } });
   if (!customer) {
     customer = await db.customer.create({
@@ -31,18 +39,25 @@ export async function submitCheckout(formData: FormData) {
     });
   }
 
+  // total is computed server-side inside createOrder; for GCash the customer paid the
+  // exact total up front, so amountPaid mirrors it once the order's total is known.
   const order = await createOrder({
     branchId: branch.id,
     channel: "ONLINE",
     items,
     customerId: customer.id,
-    paymentMethod: "UNPAID",
+    paymentMethod: paymentType === "gcash" ? "GCASH" : "UNPAID",
     amountPaid: 0,
     notes,
     isPickup,
     complete: false,
     idempotencyKey,
+    paymentReference: paymentType === "gcash" ? gcashReference : null,
   });
+
+  if (paymentType === "gcash" && order.amountPaid !== order.total) {
+    await db.order.update({ where: { id: order.id }, data: { amountPaid: order.total } });
+  }
 
   revalidatePath("/orders");
   revalidatePath("/kitchen");

@@ -226,6 +226,8 @@ model Order {
   voidReason    String?
   /** Set by the online checkout form to prevent duplicate orders from repeated "Place Order" clicks. */
   idempotencyKey String?      @unique
+  /** E-wallet transaction reference the customer supplies at checkout (e.g. GCash ref no.), for staff verification. */
+  paymentReference String?
   createdById   String?
   createdBy     User?         @relation("OrderCreatedBy", fields: [createdById], references: [id])
   createdAt     DateTime      @default(now())

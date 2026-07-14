@@ -102,6 +102,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <span>Payment</span>
             <span>{order.paymentMethod}</span>
           </div>
+          {order.paymentReference && (
+            <div className="flex justify-between text-gray-500">
+              <span>Payment Ref. (verify in GCash)</span>
+              <span className="font-mono font-semibold text-gray-900">{order.paymentReference}</span>
+            </div>
+          )}
         </div>
 
         {order.notes && <p className="mt-4 text-sm text-gray-500">Notes: {order.notes}</p>}
@@ -117,7 +123,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </form>
         )}
         {order.status === "COMPLETED" && order.paymentMethod === "UNPAID" && (
-          <RecordPaymentButton orderId={order.id} total={order.total} />
+          <RecordPaymentButton orderId={order.id} total={order.total} size="lg" />
         )}
         {order.channel === "ONLINE" && !order.isPickup && !order.delivery && order.status !== "VOIDED" && (
           <Link href={`/deliveries/new?orderId=${order.id}`} className="text-sm text-orange-600 hover:underline">

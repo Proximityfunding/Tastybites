@@ -73,7 +73,10 @@ export default async function ThankYouPage({ params }: { params: Promise<{ id: s
         </div>
 
         <p className="mt-4 text-sm text-gray-500">
-          {order.isPickup ? "Pickup" : "Delivery"} · Payment collected on {order.isPickup ? "pickup" : "delivery"}
+          {order.isPickup ? "Pickup" : "Delivery"} ·{" "}
+          {order.paymentMethod === "GCASH"
+            ? `Paid via GCash (ref. ${order.paymentReference ?? "—"}) — we'll verify your payment before preparing the order`
+            : `Payment collected on ${order.isPickup ? "pickup" : "delivery"}`}
         </p>
 
         <Link href="/shop" className="mt-6 inline-block text-sm text-orange-600 hover:underline">

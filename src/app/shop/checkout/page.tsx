@@ -4,7 +4,7 @@ import Logo from "@/components/Logo";
 import CheckoutForm from "./CheckoutForm";
 
 export default async function CheckoutPage() {
-  await getDefaultBranch();
+  const branch = await getDefaultBranch();
 
   return (
     <div className="min-h-screen bg-orange-50/40">
@@ -17,7 +17,7 @@ export default async function CheckoutPage() {
       </header>
       <div className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Checkout</h1>
-        <CheckoutForm />
+        <CheckoutForm gcashNumber={branch.phone} gcashName={branch.name} />
       </div>
     </div>
   );

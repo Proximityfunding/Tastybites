@@ -66,6 +66,7 @@ export default function Receipt({
         <Divider />
 
         <Row label="Payment" value={order.paymentMethod} />
+        {order.paymentReference && <Row label="Ref. No." value={order.paymentReference} />}
         {order.paymentMethod === "CASH" && (
           <>
             <Row label="Amount Paid" value={formatCentavos(order.amountPaid)} />
