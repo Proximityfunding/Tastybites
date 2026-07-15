@@ -16,6 +16,7 @@ import {
   UserCog,
   History,
   ChefHat,
+  Settings,
 } from "lucide-react";
 
 const ICON_COLOR = {
@@ -48,6 +49,7 @@ const NAV = [
   { href: "/customers", label: "Customers", icon: Contact, color: "orange", permission: "customers" },
   { href: "/users", label: "Users", icon: UserCog, color: "gray", roles: ["OWNER_ADMIN"] },
   { href: "/audit", label: "Audit Trail", icon: History, color: "gray", roles: ["OWNER_ADMIN"] },
+  { href: "/settings", label: "Store Settings", icon: Settings, color: "gray", roles: ["OWNER_ADMIN"] },
 ] as const;
 
 export default function Sidebar({ role, allowedPermissions }: { role: Role; allowedPermissions: PermissionKey[] }) {

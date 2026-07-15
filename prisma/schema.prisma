@@ -17,6 +17,8 @@ model Branch {
   name      String
   address   String?
   phone     String?
+  /** GCash account customers pay into at online checkout; falls back to `phone` when unset. */
+  gcashNumber String?
   createdAt DateTime @default(now())
 
   users         User[]

@@ -16,6 +16,7 @@ const STAFF_PREFIXES = [
   "/customers",
   "/audit",
   "/kitchen",
+  "/settings",
 ];
 
 export default auth((req) => {
