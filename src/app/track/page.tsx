@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS } from "@/lib/orderStatus";
 import Logo from "@/components/Logo";
+import AutoRefresh from "@/components/AutoRefresh";
 
 export default async function TrackPage({ searchParams }: { searchParams: Promise<{ phone?: string }> }) {
   const { phone } = await searchParams;
@@ -41,6 +42,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
 
         {phone && (
           <div className="mt-6 space-y-3">
+            <AutoRefresh />
             {orders.length === 0 && <p className="text-sm text-gray-400">No orders found for that number.</p>}
             {orders.map((order) => (
               <Link
