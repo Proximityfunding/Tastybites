@@ -11,6 +11,7 @@ export async function submitCheckout(formData: FormData) {
 
   const name = String(formData.get("name") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
+  const email = String(formData.get("email") || "").trim().toLowerCase() || null;
   const address = String(formData.get("address") || "").trim();
   const isPickup = formData.get("fulfillment") === "pickup";
   const notes = String(formData.get("notes") || "").trim() || null;
@@ -35,8 +36,10 @@ export async function submitCheckout(formData: FormData) {
   let customer = await db.customer.findFirst({ where: { branchId: branch.id, phone } });
   if (!customer) {
     customer = await db.customer.create({
-      data: { branchId: branch.id, name, phone, address: isPickup ? null : address },
+      data: { branchId: branch.id, name, phone, email, address: isPickup ? null : address },
     });
+  } else if (email && customer.email !== email) {
+    customer = await db.customer.update({ where: { id: customer.id }, data: { email } });
   }
 
   // total is computed server-side inside createOrder; for GCash the customer paid the

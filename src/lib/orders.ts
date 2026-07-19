@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "./db";
 import { logAudit } from "./audit";
+import { notifyOrderStatus } from "./notifications";
 import type { Prisma, OrderChannel, OrderStatus, PaymentMethod } from "@prisma/client";
 
 type TxClient = Prisma.TransactionClient;
@@ -141,7 +142,9 @@ export async function fulfillOrder(orderId: string, userId: string | null) {
 /** Any status change should go through here so COMPLETED always triggers stock deduction + ledger posting. */
 export async function updateOrderStatus(orderId: string, status: OrderStatus, userId: string | null) {
   if (status === "COMPLETED") {
-    return fulfillOrder(orderId, userId);
+    const fulfilled = await fulfillOrder(orderId, userId);
+    await notifyOrderStatus(orderId, "COMPLETED");
+    return fulfilled;
   }
   const previous = await db.order.findUniqueOrThrow({ where: { id: orderId } });
   const updated = await db.order.update({ where: { id: orderId }, data: { status } });
@@ -154,6 +157,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, us
     before: { status: previous.status },
     after: { status },
   });
+  await notifyOrderStatus(orderId, status);
   return updated;
 }
 
@@ -255,7 +259,7 @@ export async function createOrder(opts: {
 
 /** Voids an order with reason. If it was already COMPLETED, reverses stock and ledger entries. */
 export async function voidOrder(orderId: string, reason: string, userId: string) {
-  return db.$transaction(async (tx) => {
+  const voided = await db.$transaction(async (tx) => {
     const order = await tx.order.findUniqueOrThrow({ where: { id: orderId } });
     if (order.status === "VOIDED") return order;
 
@@ -312,4 +316,7 @@ export async function voidOrder(orderId: string, reason: string, userId: string)
 
     return updated;
   }, TX_OPTIONS);
+
+  await notifyOrderStatus(orderId, "VOIDED");
+  return voided;
 }

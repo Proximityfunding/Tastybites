@@ -81,6 +81,18 @@ export default function CheckoutForm({
           />
         </div>
         <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Email <span className="font-normal text-gray-400">(optional — get order status updates)</span>
+          </label>
+          <input
+            name="email"
+            type="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label className="block text-sm font-medium text-gray-700">Fulfillment</label>
           <div className="mt-1 flex gap-4 text-sm">
             <label className="flex items-center gap-2">

@@ -172,6 +172,8 @@ model Customer {
   branch      Branch    @relation(fields: [branchId], references: [id])
   name        String
   phone       String?
+  /** Optional; collected at online checkout for order-status notifications. */
+  email       String?
   address     String?
   fbHandle    String?
   tags        String[]  @default([])
@@ -235,11 +237,12 @@ model Order {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  items         OrderItem[]
-  delivery      Delivery?
-  stockLogs     StockLog[]
-  ledgerEntries LedgerEntry[]
-  auditLogs     AuditLog[]
+  items            OrderItem[]
+  delivery         Delivery?
+  stockLogs        StockLog[]
+  ledgerEntries    LedgerEntry[]
+  auditLogs        AuditLog[]
+  notificationLogs NotificationLog[]
 
   @@index([branchId])
   @@index([channel])
@@ -379,6 +382,24 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   @@index([entityType, entityId])
+}
+
+/**
+ * One row per attempted customer notification (currently order-status emails via
+ * Resend). SKIPPED rows record why nothing was sent (no email, no API key), so
+ * "why didn't the customer get an email?" is always answerable.
+ */
+model NotificationLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  channel   String // "EMAIL"
+  recipient String?
+  status    String // "SENT" | "SKIPPED" | "FAILED"
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
 }
 
 /**
