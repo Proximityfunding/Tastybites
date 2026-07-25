@@ -78,7 +78,7 @@ export default async function ReportsPage({
           </a>
         </div>
       </div>
-      <PeriodSelector basePath="/reports" current={period} />
+      <PeriodSelector basePath="/reports" current={period} from={from} to={to} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>

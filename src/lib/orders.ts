@@ -42,13 +42,15 @@ async function deductStockAndComputeCogs(
 
   let cogs = 0;
   for (const item of items) {
+    // COGS is the product's own Cost field (set on the Products page), not a derived sum of
+    // ingredient costs — recipe ingredients below are only used to deduct inventory stock.
+    cogs += item.product.cost * item.qty;
     for (const ri of item.product.recipe) {
       const consumeQty = ri.quantity * item.qty;
-      const ingredient = await tx.ingredient.update({
+      await tx.ingredient.update({
         where: { id: ri.ingredientId },
         data: { stockQty: { decrement: consumeQty } },
       });
-      cogs += ingredient.costPerUnit * consumeQty;
       await tx.stockLog.create({
         data: {
           branchId,

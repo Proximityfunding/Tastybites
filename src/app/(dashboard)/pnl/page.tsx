@@ -49,7 +49,7 @@ export default async function PnLPage({
           Export CSV
         </a>
       </div>
-      <PeriodSelector basePath="/pnl" current={period} />
+      <PeriodSelector basePath="/pnl" current={period} from={from} to={to} />
 
       <div className="rounded-md border border-gray-200 bg-white p-6 text-sm">
         <Row label="Sales Revenue" value={revenue} />
