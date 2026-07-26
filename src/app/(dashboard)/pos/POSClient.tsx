@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Printer, Plus } from "lucide-react";
+import { Search, Printer, Plus, Trash2 } from "lucide-react";
 import { useCartStore } from "@/lib/cart";
 import { formatCentavos } from "@/lib/money";
 import { submitPOSOrder } from "./actions";
@@ -76,7 +76,7 @@ export default function POSClient({
   defaultChannel?: "DINE_IN" | "WALK_IN" | "ONLINE";
 }) {
   const router = useRouter();
-  const { lines, addItem, updateQty, updateModifiers, clear } = useCartStore();
+  const { lines, addItem, updateQty, updateModifiers, removeItem, clear } = useCartStore();
   const [channel, setChannel] = useState<"DINE_IN" | "WALK_IN" | "ONLINE">(defaultChannel);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "GCASH" | "CARD">("CASH");
   const [discount, setDiscount] = useState(0);
@@ -379,7 +379,17 @@ export default function POSClient({
               <div key={line.productId} className="border-b border-gray-100 pb-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium text-gray-900">{line.name}</span>
-                  <span className="text-gray-600">{formatCentavos(line.unitPrice * line.qty)}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-gray-600">{formatCentavos(line.unitPrice * line.qty)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(line.productId)}
+                      aria-label={`Remove ${line.name} from cart`}
+                      className="text-gray-300 hover:text-red-600"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <button
