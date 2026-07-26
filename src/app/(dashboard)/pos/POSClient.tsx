@@ -117,6 +117,14 @@ export default function POSClient({
   const total = Math.max(0, subtotal - discount);
   const change = paymentMethod === "CASH" ? amountTendered - total : 0;
 
+  /** Handy cash buttons: the exact total plus the next round peso notes up (₱100/500/1,000), in centavos. */
+  const quickTenders = useMemo(() => {
+    if (total <= 0) return [];
+    const roundUp = (n: number, step: number) => Math.ceil(n / step) * step;
+    const candidates = [total, roundUp(total, 10000), roundUp(total, 50000), roundUp(total, 100000)];
+    return [...new Set(candidates)].filter((n) => n >= total).slice(0, 4);
+  }, [total]);
+
   function submit(complete: boolean) {
     setError(null);
     if (lines.length === 0) {
@@ -473,29 +481,20 @@ export default function POSClient({
                 />
               </div>
 
-              <div className="mt-2 flex justify-end gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setAmountTendered(total)}
-                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
-                >
-                  Exact
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAmountTendered(50000)}
-                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
-                >
-                  500
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAmountTendered(100000)}
-                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
-                >
-                  1,000
-                </button>
-              </div>
+              {quickTenders.length > 0 && (
+                <div className="mt-2 flex justify-end gap-1.5">
+                  {quickTenders.map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setAmountTendered(amt)}
+                      className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                    >
+                      {amt === total ? "Exact" : (amt / 100).toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-2 space-y-1 border-t border-gray-200 pt-2 text-sm">
                 <div className="flex justify-between text-gray-600">
