@@ -472,13 +472,44 @@ export default function POSClient({
                   className="w-28 rounded border border-gray-300 px-2 py-1 text-right text-sm"
                 />
               </div>
-              <div
-                className={`mt-2 flex justify-between text-sm font-semibold ${
-                  amountTendered === 0 ? "text-gray-400" : change < 0 ? "text-red-600" : "text-emerald-700"
-                }`}
-              >
-                <span>Change</span>
-                <span>{amountTendered > 0 ? formatCentavos(Math.max(0, change)) : "—"}</span>
+
+              <div className="mt-2 flex justify-end gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setAmountTendered(total)}
+                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                >
+                  Exact
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAmountTendered(50000)}
+                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                >
+                  500
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAmountTendered(100000)}
+                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                >
+                  1,000
+                </button>
+              </div>
+
+              <div className="mt-2 space-y-1 border-t border-gray-200 pt-2 text-sm">
+                <div className="flex justify-between text-gray-600">
+                  <span>Cash tendered</span>
+                  <span>{amountTendered > 0 ? formatCentavos(amountTendered) : "—"}</span>
+                </div>
+                <div
+                  className={`flex justify-between font-semibold ${
+                    amountTendered === 0 ? "text-gray-400" : change < 0 ? "text-red-600" : "text-emerald-700"
+                  }`}
+                >
+                  <span>Change</span>
+                  <span>{amountTendered > 0 ? formatCentavos(Math.max(0, change)) : "—"}</span>
+                </div>
               </div>
               {amountTendered > 0 && change < 0 && (
                 <p className="mt-1 text-xs text-red-600">Short by {formatCentavos(-change)}</p>
