@@ -58,9 +58,9 @@ export default function Receipt({
 
         <Row label="Subtotal" value={formatCentavos(order.subtotal)} />
         {order.discount > 0 && <Row label="Discount" value={`-${formatCentavos(order.discount)}`} />}
-        <div className="flex justify-between text-sm font-bold">
-          <span>TOTAL</span>
-          <span>{formatCentavos(order.total)}</span>
+        <div className="flex justify-between gap-2 text-sm font-bold">
+          <span className="shrink-0">TOTAL</span>
+          <span className="min-w-0 flex-1 break-words text-right">{formatCentavos(order.total)}</span>
         </div>
 
         <Divider />
