@@ -585,7 +585,7 @@ function OrderSlip({
 }) {
   return (
     <div className="hidden print:block">
-      <div className="mx-auto w-full px-[2mm] text-xs text-black">
+      <div className="mx-auto w-full px-[1mm] text-xs text-black">
         {customerName && <div className="text-lg font-bold">{customerName}</div>}
         <div className="mb-2 flex items-center justify-between">
           <span className="text-lg font-extrabold">Order</span>

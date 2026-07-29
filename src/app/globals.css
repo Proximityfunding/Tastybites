@@ -27,13 +27,15 @@ body {
 
 @media print {
   /*
-   * Thermal receipt printers use a continuous 58mm roll, not a fixed page
-   * like Letter/A4. Without this, the browser lays the receipt out on a
-   * default-size page, which most thermal printer drivers can't handle —
-   * the print job either gets rejected or silently does nothing.
+   * Thermal receipt printers use a continuous roll, not a fixed page like
+   * Letter/A4 — without this the browser lays content out on a default-size
+   * page, which most thermal printer drivers reject or silently ignore.
+   * The roll itself is 58mm, but the print head can only mark ~48mm of
+   * that (a few mm on each edge is mechanically dead space), so the page
+   * is sized to the actual printable width, not the full roll.
    */
   @page {
-    size: 58mm auto;
+    size: 48mm auto;
     margin: 0;
   }
   body {
