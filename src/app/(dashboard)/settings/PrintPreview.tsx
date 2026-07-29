@@ -74,7 +74,10 @@ export default function PrintPreview({ defaultValue }: { defaultValue: number })
             <Divider />
             {SAMPLE_ITEMS.map((item) => (
               <div key={item.name} className="mb-1 break-words">
-                {item.qty}x {item.name} — {item.price}
+                <div>
+                  {item.qty}x {item.name}
+                </div>
+                <div>{item.price}</div>
               </div>
             ))}
             <Divider />

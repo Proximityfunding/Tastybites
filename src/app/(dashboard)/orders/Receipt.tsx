@@ -42,7 +42,10 @@ export default function Receipt({
 
         {order.items.map((item) => (
           <div key={item.id} className="mb-1 break-words">
-            {item.qty}x {item.product.name} — {formatCentavos(item.lineTotal)}
+            <div>
+              {item.qty}x {item.product.name}
+            </div>
+            <div>{formatCentavos(item.lineTotal)}</div>
             {item.modifiers && (item.modifiers as { note?: string }).note && (
               <div className="pl-3 text-[10px] italic">{(item.modifiers as { note?: string }).note}</div>
             )}
