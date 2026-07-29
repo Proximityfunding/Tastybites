@@ -18,7 +18,7 @@ export default function Receipt({
 
   return (
     <div className="hidden print:block">
-      <div className="mx-auto w-full pl-0 pr-[5mm] font-mono text-[10px] leading-snug text-black">
+      <div className="mx-auto w-full px-0 font-mono text-[10px] leading-snug text-black">
         <div className="text-center">
           <div className="text-sm font-bold">{branch.name}</div>
           {branch.address && <div>{branch.address}</div>}
