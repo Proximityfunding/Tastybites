@@ -15,7 +15,7 @@ const CHANNEL_LABEL: Record<string, string> = {
 export default function OrderSlip({ order }: { order: SlipOrder }) {
   return (
     <div className="hidden print:block">
-      <div className="mx-auto w-full px-[5mm] text-xs text-black">
+      <div className="mx-auto w-full pl-[2mm] pr-[5mm] text-xs text-black">
         <div className="mb-2">
           <div className="text-lg font-extrabold">#{order.id.slice(-6)}</div>
           {order.customer?.name && <div className="text-sm font-semibold">{order.customer.name}</div>}

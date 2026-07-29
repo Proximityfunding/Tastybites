@@ -109,7 +109,7 @@ function PreviewPaper({ label, widthMm, children }: { label: string; widthMm: nu
       </div>
       <div
         style={{ width: `${widthMm}mm` }}
-        className="max-w-full border border-dashed border-gray-300 bg-white px-[5mm] py-2 text-xs text-black shadow-sm"
+        className="max-w-full border border-dashed border-gray-300 bg-white pl-[2mm] pr-[5mm] py-2 text-xs text-black shadow-sm"
       >
         {children}
       </div>
