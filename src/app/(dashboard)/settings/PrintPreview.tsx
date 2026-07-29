@@ -33,8 +33,10 @@ export default function PrintPreview({ defaultValue }: { defaultValue: number })
         className="mt-1 w-32 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
       />
       <p className="mt-1 text-xs text-gray-400">
-        The actual printable width of your thermal roll — not the roll size itself. A "58mm" printer
-        often only prints ~43-48mm; if receipts print with the right edge cut off, lower this number.
+        Match this to the paper size configured in your printer driver (Windows: Printer Properties →
+        Advanced/Preferences → Paper Size), not a guess — if it's narrower than that, the driver may
+        scale the page up to fill its own canvas, which can push content past the edge instead of fixing
+        it. A safety margin is already built in, so you shouldn't need to shrink this to avoid cutoff.
       </p>
 
       <div className="mt-4 flex flex-wrap items-start gap-6">
@@ -107,7 +109,7 @@ function PreviewPaper({ label, widthMm, children }: { label: string; widthMm: nu
       </div>
       <div
         style={{ width: `${widthMm}mm` }}
-        className="max-w-full border border-dashed border-gray-300 bg-white px-[1mm] py-2 text-xs text-black shadow-sm"
+        className="max-w-full border border-dashed border-gray-300 bg-white px-[5mm] py-2 text-xs text-black shadow-sm"
       >
         {children}
       </div>
