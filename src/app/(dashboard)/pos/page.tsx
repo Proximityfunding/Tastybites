@@ -25,7 +25,7 @@ export default async function POSPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-gray-900">POS</h1>
+      <h1 className="mb-4 text-2xl font-semibold text-gray-900 print:hidden">POS</h1>
       <POSClient
         products={products.map((p) => ({
           id: p.id,
