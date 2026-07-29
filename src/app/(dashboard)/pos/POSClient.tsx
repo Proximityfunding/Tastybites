@@ -632,10 +632,7 @@ function OrderSlip({
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-          <span>just now</span>
-          <span>{new Date().toLocaleTimeString()}</span>
-        </div>
+        <div className="mt-3 text-xs text-gray-500">Time: {new Date().toLocaleTimeString()}</div>
       </div>
     </div>
   );

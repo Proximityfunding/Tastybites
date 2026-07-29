@@ -42,7 +42,7 @@ export default function OrderSlip({ order }: { order: SlipOrder }) {
 
         {order.notes && <div className="mt-2 text-xs italic">Notes: {order.notes}</div>}
 
-        <div className="mt-3 text-right text-xs text-gray-500">{order.createdAt.toLocaleTimeString()}</div>
+        <div className="mt-3 text-xs text-gray-500">Time: {order.createdAt.toLocaleTimeString()}</div>
       </div>
     </div>
   );
