@@ -90,6 +90,8 @@ export default function POSClient({
   const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
   /** Cash received from the customer, in centavos. Only used when paymentMethod is CASH. */
   const [amountTendered, setAmountTendered] = useState(0);
+  /** Below the `lg` breakpoint the cart becomes a bottom-sheet drawer instead of a fixed sidebar. */
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
   function addItemToCart(product: { id: string; name: string; price: number }) {
     if (completedOrder) setCompletedOrder(null);
@@ -171,11 +173,12 @@ export default function POSClient({
 
   function startNewSale() {
     setCompletedOrder(null);
+    setMobileCartOpen(false);
   }
 
   return (
     <>
-    <div className="flex gap-6 print:hidden">
+    <div className="pb-20 lg:flex lg:gap-6 lg:pb-0 print:hidden">
       <div className="flex-1">
         <div className="mb-4 space-y-3">
           <div className="relative">
@@ -302,8 +305,18 @@ export default function POSClient({
         })}
       </div>
 
+      <div
+        className={`${mobileCartOpen ? "fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-4" : "hidden"} lg:static lg:z-auto lg:block lg:w-96 lg:shrink-0 lg:overflow-visible lg:bg-transparent lg:p-0`}
+      >
+      <button
+        type="button"
+        onClick={() => setMobileCartOpen(false)}
+        className="mb-3 flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 lg:hidden"
+      >
+        <span>← Back to Menu</span>
+      </button>
       {completedOrder ? (
-        <div className="w-96 shrink-0 rounded-md border border-emerald-200 bg-emerald-50 p-4 print:hidden">
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 print:hidden">
           <div className="mb-1 text-lg font-semibold text-emerald-900">Order Placed ✓</div>
           <div className="mb-4 text-sm text-emerald-700">
             Order #{completedOrder.id.slice(-6)} · {formatCentavos(completedOrder.total)}
@@ -354,7 +367,7 @@ export default function POSClient({
           </div>
         </div>
       ) : (
-      <div className="w-96 shrink-0 rounded-md border border-gray-200 bg-white p-4">
+      <div className="rounded-md border border-gray-200 bg-white p-4">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Order</h2>
 
         <div>
@@ -556,7 +569,23 @@ export default function POSClient({
         </button>
       </div>
       )}
+      </div>
     </div>
+
+    {!mobileCartOpen && (lines.length > 0 || completedOrder) && (
+      <button
+        type="button"
+        onClick={() => setMobileCartOpen(true)}
+        className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 bg-orange-600 px-4 py-3 text-white shadow-[0_-2px_10px_rgba(0,0,0,0.15)] lg:hidden print:hidden"
+      >
+        <span className="text-sm font-semibold">
+          {completedOrder ? "Order Placed ✓" : `${lines.reduce((n, l) => n + l.qty, 0)} item(s)`}
+        </span>
+        <span className="text-sm font-bold">
+          {formatCentavos(completedOrder ? completedOrder.total : total)} · View Cart
+        </span>
+      </button>
+    )}
 
     {completedOrder ? (
       <Receipt order={completedOrder} branch={branch} />

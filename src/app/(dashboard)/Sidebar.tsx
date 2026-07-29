@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import type { Role } from "@prisma/client";
 import type { PermissionKey } from "@/lib/permissions";
 import Logo from "@/components/Logo";
+import { useMobileNav } from "@/lib/mobileNav";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -17,6 +20,7 @@ import {
   History,
   ChefHat,
   Settings,
+  X,
 } from "lucide-react";
 
 const ICON_COLOR = {
@@ -53,26 +57,46 @@ const NAV = [
 ] as const;
 
 export default function Sidebar({ role, allowedPermissions }: { role: Role; allowedPermissions: PermissionKey[] }) {
+  const { open, close } = useMobileNav();
   const allowedSet = new Set<string>(allowedPermissions);
   const items = NAV.filter((item) =>
     "permission" in item ? allowedSet.has(item.permission) : (item.roles as readonly string[]).includes(role)
   );
 
   return (
-    <nav className="flex h-full w-56 flex-col gap-1 border-r border-gray-200 bg-white p-3">
-      <div className="mb-4 px-2">
-        <Logo size="sm" withTagline={false} />
-      </div>
-      {items.map(({ href, label, icon: Icon, color }) => (
-        <Link
-          key={href}
-          href={href}
-          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700"
-        >
-          <Icon size={16} className={ICON_COLOR[color]} />
-          {label}
-        </Link>
-      ))}
-    </nav>
+    <>
+      {open && (
+        <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={close} aria-hidden="true" />
+      )}
+
+      <nav
+        className={`fixed inset-y-0 left-0 z-50 flex h-full w-64 -translate-x-full flex-col gap-1 border-r border-gray-200 bg-white p-3 transition-transform duration-200 lg:static lg:z-auto lg:w-56 lg:translate-x-0 ${
+          open ? "translate-x-0" : ""
+        }`}
+      >
+        <div className="mb-4 flex items-center justify-between px-2">
+          <Logo size="sm" withTagline={false} />
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close menu"
+            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        {items.map(({ href, label, icon: Icon, color }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={close}
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700"
+          >
+            <Icon size={16} className={ICON_COLOR[color]} />
+            {label}
+          </Link>
+        ))}
+      </nav>
+    </>
   );
 }
