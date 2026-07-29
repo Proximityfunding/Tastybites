@@ -16,13 +16,13 @@ export default function OrderSlip({ order }: { order: SlipOrder }) {
   return (
     <div className="hidden print:block">
       <div className="mx-auto w-full px-[1mm] text-xs text-black">
-        {order.customer?.name && <div className="text-lg font-bold">{order.customer.name}</div>}
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-lg font-extrabold">#{order.id.slice(-6)}</span>
-          <span className="rounded-full border border-black px-2 py-0.5 text-xs font-medium">
+        <div className="mb-2">
+          <div className="text-lg font-extrabold">#{order.id.slice(-6)}</div>
+          {order.customer?.name && <div className="text-sm font-semibold">{order.customer.name}</div>}
+          <div className="mt-0.5 text-xs font-medium">
             {CHANNEL_LABEL[order.channel] || order.channel}
             {order.isPickup ? " · Pickup" : ""}
-          </span>
+          </div>
         </div>
 
         <div className="space-y-1">

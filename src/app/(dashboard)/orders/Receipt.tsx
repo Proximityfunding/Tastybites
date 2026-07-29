@@ -42,11 +42,11 @@ export default function Receipt({
 
         {order.items.map((item) => (
           <div key={item.id} className="mb-1">
-            <div className="flex justify-between">
-              <span>
+            <div className="flex justify-between gap-2">
+              <span className="min-w-0 flex-1 break-words">
                 {item.qty}x {item.product.name}
               </span>
-              <span>{formatCentavos(item.lineTotal)}</span>
+              <span className="shrink-0">{formatCentavos(item.lineTotal)}</span>
             </div>
             {item.modifiers && (item.modifiers as { note?: string }).note && (
               <div className="pl-3 text-[10px] italic">{(item.modifiers as { note?: string }).note}</div>
@@ -94,9 +94,9 @@ export default function Receipt({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
-      <span>{label}</span>
-      <span>{value}</span>
+    <div className="flex justify-between gap-2">
+      <span className="shrink-0">{label}</span>
+      <span className="min-w-0 flex-1 break-words text-right">{value}</span>
     </div>
   );
 }

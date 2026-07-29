@@ -586,12 +586,10 @@ function OrderSlip({
   return (
     <div className="hidden print:block">
       <div className="mx-auto w-full px-[1mm] text-xs text-black">
-        {customerName && <div className="text-lg font-bold">{customerName}</div>}
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-lg font-extrabold">Order</span>
-          <span className="rounded-full border border-black px-2 py-0.5 text-xs font-medium">
-            {CHANNEL_LABEL[channel] || channel}
-          </span>
+        <div className="mb-2">
+          <div className="text-lg font-extrabold">Order</div>
+          {customerName && <div className="text-sm font-semibold">{customerName}</div>}
+          <div className="mt-0.5 text-xs font-medium">{CHANNEL_LABEL[channel] || channel}</div>
         </div>
 
         <div className="space-y-1">
