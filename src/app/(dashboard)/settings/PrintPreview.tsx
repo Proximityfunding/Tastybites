@@ -73,18 +73,12 @@ export default function PrintPreview({ defaultValue }: { defaultValue: number })
             <PreviewRow label="Channel" value="DINE IN" />
             <Divider />
             {SAMPLE_ITEMS.map((item) => (
-              <div key={item.name} className="mb-1 flex justify-between gap-2">
-                <span className="min-w-0 flex-1 break-words">
-                  {item.qty}x {item.name}
-                </span>
-                <span className="shrink-0">{item.price}</span>
+              <div key={item.name} className="mb-1 break-words">
+                {item.qty}x {item.name} — {item.price}
               </div>
             ))}
             <Divider />
-            <div className="flex justify-between gap-2 text-sm font-bold">
-              <span>TOTAL</span>
-              <span>₱375.00</span>
-            </div>
+            <div className="break-words text-sm font-bold">TOTAL: ₱375.00</div>
             <Divider />
             <PreviewRow label="Payment" value="CASH" />
             <PreviewRow label="Amount Paid" value="₱400.00" />
@@ -119,9 +113,8 @@ function PreviewPaper({ label, widthMm, children }: { label: string; widthMm: nu
 
 function PreviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-2">
-      <span className="shrink-0">{label}</span>
-      <span className="min-w-0 flex-1 break-words text-right">{value}</span>
+    <div className="break-words">
+      {label}: {value}
     </div>
   );
 }
