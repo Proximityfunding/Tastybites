@@ -16,11 +16,17 @@ export async function updateStoreSettings(formData: FormData) {
   const gcashNumber = String(formData.get("gcashNumber") || "").trim() || null;
   if (!name) throw new Error("Store name is required");
 
+  const paperWidthRaw = Number(formData.get("receiptPaperWidthMm"));
+  if (!Number.isInteger(paperWidthRaw) || paperWidthRaw < 20 || paperWidthRaw > 120) {
+    throw new Error("Paper width must be a whole number between 20 and 120mm");
+  }
+  const receiptPaperWidthMm = paperWidthRaw;
+
   const before = await db.branch.findUniqueOrThrow({ where: { id: admin.branchId } });
 
   await db.branch.update({
     where: { id: admin.branchId },
-    data: { name, address, phone, gcashNumber },
+    data: { name, address, phone, gcashNumber, receiptPaperWidthMm },
   });
 
   await logAudit({
@@ -28,8 +34,14 @@ export async function updateStoreSettings(formData: FormData) {
     action: "STORE_SETTINGS_UPDATE",
     entityType: "Branch",
     entityId: admin.branchId,
-    before: { name: before.name, address: before.address, phone: before.phone, gcashNumber: before.gcashNumber },
-    after: { name, address, phone, gcashNumber },
+    before: {
+      name: before.name,
+      address: before.address,
+      phone: before.phone,
+      gcashNumber: before.gcashNumber,
+      receiptPaperWidthMm: before.receiptPaperWidthMm,
+    },
+    after: { name, address, phone, gcashNumber, receiptPaperWidthMm },
   });
 
   // Store identity appears on the statically prerendered storefront pages.
@@ -37,6 +49,8 @@ export async function updateStoreSettings(formData: FormData) {
   revalidatePath("/shop");
   revalidatePath("/shop/checkout");
   revalidatePath("/settings");
+  revalidatePath("/pos");
+  revalidatePath("/orders");
 
   redirect("/settings?saved=1");
 }

@@ -27,17 +27,10 @@ body {
 
 @media print {
   /*
-   * Thermal receipt printers use a continuous roll, not a fixed page like
-   * Letter/A4 — without this the browser lays content out on a default-size
-   * page, which most thermal printer drivers reject or silently ignore.
-   * The roll itself is 58mm, but the print head only marks ~43mm of that on
-   * this printer (a few mm on each edge is mechanically dead space), so the
-   * page is sized to the actual printable width, not the full roll.
+   * The @page size itself is injected per-request in (dashboard)/layout.tsx
+   * from the branch's saved receiptPaperWidthMm, since it needs to be a
+   * live-editable setting rather than a fixed value here.
    */
-  @page {
-    size: 43mm auto;
-    margin: 0;
-  }
   body {
     background: white;
   }

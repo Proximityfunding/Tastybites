@@ -2,6 +2,7 @@ import { requirePageRole } from "@/lib/access";
 import { db } from "@/lib/db";
 import { FormField, SubmitButton } from "@/components/FormField";
 import { updateStoreSettings } from "./actions";
+import PrintPreview from "./PrintPreview";
 
 export default async function StoreSettingsPage({
   searchParams,
@@ -13,7 +14,7 @@ export default async function StoreSettingsPage({
   const branch = await db.branch.findUniqueOrThrow({ where: { id: user.branchId } });
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-3xl">
       <h1 className="mb-1 text-2xl font-semibold text-gray-900">Store Settings</h1>
       <p className="mb-6 text-sm text-gray-500">
         This information appears on the storefront, printed receipts, and GCash payment instructions at
@@ -27,24 +28,32 @@ export default async function StoreSettingsPage({
       )}
 
       <form action={updateStoreSettings} className="space-y-4">
-        <FormField label="Store Name" name="name" required defaultValue={branch.name} />
-        <FormField label="Address" name="address" defaultValue={branch.address ?? ""} />
-        <FormField
-          label="Contact Number"
-          name="phone"
-          defaultValue={branch.phone ?? ""}
-          placeholder="e.g. 0917-000-1234"
-        />
-        <FormField
-          label="GCash Number"
-          name="gcashNumber"
-          defaultValue={branch.gcashNumber ?? ""}
-          placeholder="Where online customers send GCash payments"
-        />
-        <p className="text-xs text-gray-400">
-          If the GCash number is left blank, the contact number is shown in checkout payment instructions
-          instead.
-        </p>
+        <div className="max-w-lg space-y-4">
+          <FormField label="Store Name" name="name" required defaultValue={branch.name} />
+          <FormField label="Address" name="address" defaultValue={branch.address ?? ""} />
+          <FormField
+            label="Contact Number"
+            name="phone"
+            defaultValue={branch.phone ?? ""}
+            placeholder="e.g. 0917-000-1234"
+          />
+          <FormField
+            label="GCash Number"
+            name="gcashNumber"
+            defaultValue={branch.gcashNumber ?? ""}
+            placeholder="Where online customers send GCash payments"
+          />
+          <p className="text-xs text-gray-400">
+            If the GCash number is left blank, the contact number is shown in checkout payment
+            instructions instead.
+          </p>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <h2 className="mb-3 text-sm font-semibold text-gray-900">Receipt Printer</h2>
+          <PrintPreview defaultValue={branch.receiptPaperWidthMm} />
+        </div>
+
         <SubmitButton>Save Settings</SubmitButton>
       </form>
     </div>

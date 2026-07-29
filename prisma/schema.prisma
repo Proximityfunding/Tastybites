@@ -19,6 +19,8 @@ model Branch {
   phone     String?
   /** GCash account customers pay into at online checkout; falls back to `phone` when unset. */
   gcashNumber String?
+  /** Thermal printer paper width in millimeters, used for the @page size on printed receipts/order slips. */
+  receiptPaperWidthMm Int @default(43)
   createdAt DateTime @default(now())
 
   users         User[]
