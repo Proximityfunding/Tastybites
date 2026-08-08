@@ -2,6 +2,7 @@ import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { STATUS_LABELS, KITCHEN_NEXT_STATUS, KDS_ACTIVE_STATUSES } from "@/lib/orderStatus";
 import { changeOrderStatus } from "../orders/actions";
+import { formatManilaTime } from "@/lib/timezone";
 import AutoRefresh from "@/components/AutoRefresh";
 import type { OrderStatus } from "@prisma/client";
 
@@ -97,7 +98,7 @@ export default async function KitchenDisplayPage() {
                         <span className={urgency.text}>
                           {minutes === 0 ? "just now" : `${minutes} min ago`}
                         </span>
-                        <span className="text-gray-400">{order.createdAt.toLocaleTimeString()}</span>
+                        <span className="text-gray-400">{formatManilaTime(order.createdAt)}</span>
                       </div>
 
                       {nextStatus && (

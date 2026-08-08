@@ -7,6 +7,7 @@ import { STATUS_LABELS, STATUS_COLORS } from "@/lib/orderStatus";
 import { FormField, SubmitButton } from "@/components/FormField";
 import StatCard from "@/components/StatCard";
 import { requirePagePermission } from "@/lib/access";
+import { formatManilaDate } from "@/lib/timezone";
 import { updateCustomer } from "../actions";
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -28,7 +29,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
           <StatCard label="Total Spend" value={formatCentavos(customer.totalSpend)} color="green" icon={Wallet} />
           <StatCard
             label="Last Order"
-            value={customer.lastOrderAt?.toLocaleDateString() || "—"}
+            value={customer.lastOrderAt ? formatManilaDate(customer.lastOrderAt) : "—"}
             color="blue"
             icon={CalendarClock}
           />
@@ -62,7 +63,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   <Link href={`/orders/${o.id}`} className="text-orange-600 hover:underline">
                     #{o.id.slice(-6)}
                   </Link>
-                  <div className="text-xs text-gray-400">{o.createdAt.toLocaleDateString()}</div>
+                  <div className="text-xs text-gray-400">{formatManilaDate(o.createdAt)}</div>
                 </td>
                 <td className="py-2 pr-4 text-gray-600">{o.channel}</td>
                 <td className="py-2 pr-4 text-gray-600">{formatCentavos(o.total)}</td>

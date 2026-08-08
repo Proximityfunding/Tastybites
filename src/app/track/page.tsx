@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS } from "@/lib/orderStatus";
+import { formatManilaDate } from "@/lib/timezone";
 import Logo from "@/components/Logo";
 import AutoRefresh from "@/components/AutoRefresh";
 
@@ -55,7 +56,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
                   <span className="text-gray-500">{STATUS_LABELS[order.status]}</span>
                 </div>
                 <div className="text-sm text-gray-500">
-                  {order.createdAt.toLocaleDateString()} · {formatCentavos(order.total)}
+                  {formatManilaDate(order.createdAt)} · {formatCentavos(order.total)}
                 </div>
               </Link>
             ))}

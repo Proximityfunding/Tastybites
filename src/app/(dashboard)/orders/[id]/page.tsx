@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { requirePagePermission } from "@/lib/access";
 import { getDefaultBranch } from "@/lib/branch";
 import { formatCentavos } from "@/lib/money";
+import { formatManilaDateTime } from "@/lib/timezone";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
 import { changeOrderStatus, voidOrderAction } from "../actions";
 import PrintControls from "../PrintControls";
@@ -42,7 +43,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div className="rounded-md border border-gray-200 bg-white p-6 print:hidden">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <div className="text-sm text-gray-500">{order.createdAt.toLocaleString()}</div>
+            <div className="text-sm text-gray-500">{formatManilaDateTime(order.createdAt)}</div>
             <div className="text-sm text-gray-500">
               {order.channel} {order.isPickup ? "· Pickup" : ""}
             </div>

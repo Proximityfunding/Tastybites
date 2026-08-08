@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
+import { formatManilaDate } from "@/lib/timezone";
 
 export default async function CustomersPage({
   searchParams,
@@ -64,7 +65,7 @@ export default async function CustomersPage({
               <td className="py-2 pr-4 text-gray-600">{c.phone || "—"}</td>
               <td className="py-2 pr-4 text-gray-600">{c.tags.join(", ") || "—"}</td>
               <td className="py-2 pr-4 text-gray-600">{formatCentavos(c.totalSpend)}</td>
-              <td className="py-2 pr-4 text-gray-600">{c.lastOrderAt?.toLocaleDateString() || "—"}</td>
+              <td className="py-2 pr-4 text-gray-600">{c.lastOrderAt ? formatManilaDate(c.lastOrderAt) : "—"}</td>
             </tr>
           ))}
           {customers.length === 0 && (

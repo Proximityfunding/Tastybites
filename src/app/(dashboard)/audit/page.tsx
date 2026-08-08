@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requirePageRole } from "@/lib/access";
 import { db } from "@/lib/db";
+import { formatManilaDateTime } from "@/lib/timezone";
 
 const ACTION_COLOR: Record<string, string> = {
   CREATE: "bg-emerald-100 text-emerald-700",
@@ -88,7 +89,7 @@ export default async function AuditPage({
         <tbody>
           {logs.map((log) => (
             <tr key={log.id} className="border-b border-gray-100 align-top">
-              <td className="py-2 pr-4 whitespace-nowrap text-gray-500">{log.createdAt.toLocaleString()}</td>
+              <td className="py-2 pr-4 whitespace-nowrap text-gray-500">{formatManilaDateTime(log.createdAt)}</td>
               <td className="py-2 pr-4 text-gray-700">{log.user?.name || "System"}</td>
               <td className="py-2 pr-4">
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colorFor(log.action)}`}>

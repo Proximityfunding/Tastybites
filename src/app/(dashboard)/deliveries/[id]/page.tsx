@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requirePagePermission } from "@/lib/access";
 import { formatCentavos, centavosToPesos } from "@/lib/money";
+import { formatManilaDateTime } from "@/lib/timezone";
 import { FormField, FormSelect, SubmitButton } from "@/components/FormField";
 import { updateDelivery } from "../actions";
 
@@ -68,8 +69,8 @@ export default async function DeliveryDetailPage({ params }: { params: Promise<{
         </div>
         <FormField label="Notes" name="notes" defaultValue={delivery.notes ?? ""} />
         <p className="text-xs text-gray-500">
-          Dispatched: {delivery.dispatchedAt?.toLocaleString() ?? "—"} · Delivered:{" "}
-          {delivery.deliveredAt?.toLocaleString() ?? "—"}
+          Dispatched: {delivery.dispatchedAt ? formatManilaDateTime(delivery.dispatchedAt) : "—"} · Delivered:{" "}
+          {delivery.deliveredAt ? formatManilaDateTime(delivery.deliveredAt) : "—"}
         </p>
         <SubmitButton />
       </form>

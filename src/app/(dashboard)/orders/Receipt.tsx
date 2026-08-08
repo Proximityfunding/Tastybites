@@ -1,5 +1,6 @@
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS } from "@/lib/orderStatus";
+import { formatManilaDateTime } from "@/lib/timezone";
 import type { Order, OrderItem, Product, Customer } from "@prisma/client";
 
 type ReceiptOrder = Order & {
@@ -32,7 +33,7 @@ export default function Receipt({
         <Divider />
 
         <Row label="Order #" value={order.id.slice(-8).toUpperCase()} />
-        <Row label="Date" value={order.createdAt.toLocaleString()} />
+        <Row label="Date" value={formatManilaDateTime(order.createdAt)} />
         <Row label="Channel" value={order.channel.replace("_", " ")} />
         <Row label="Status" value={STATUS_LABELS[order.status]} />
         {order.customer && <Row label="Customer" value={order.customer.name} />}

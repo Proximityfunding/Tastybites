@@ -1,4 +1,5 @@
 import type { Order, OrderItem, Product, Customer } from "@prisma/client";
+import { formatManilaTime } from "@/lib/timezone";
 
 type SlipOrder = Order & {
   items: (OrderItem & { product: Product })[];
@@ -42,7 +43,7 @@ export default function OrderSlip({ order }: { order: SlipOrder }) {
 
         {order.notes && <div className="mt-2 text-xs italic">Notes: {order.notes}</div>}
 
-        <div className="mt-3 text-xs text-gray-500">Time: {order.createdAt.toLocaleTimeString()}</div>
+        <div className="mt-3 text-xs text-gray-500">Time: {formatManilaTime(order.createdAt)}</div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Package, Home, Zap, Users, Truck, CircleEllipsis } from "lucide-react";
 import { requirePagePermission } from "@/lib/access";
 import { db } from "@/lib/db";
 import { formatCentavos } from "@/lib/money";
+import { formatManilaDate } from "@/lib/timezone";
 import { generateDueRecurringExpenses } from "@/lib/expenses";
 import StatCard, { type StatCardColor } from "@/components/StatCard";
 
@@ -75,7 +76,7 @@ export default async function ExpensesPage() {
             const style = CATEGORY_STYLE[e.category] ?? CATEGORY_STYLE.MISC;
             return (
               <tr key={e.id} className="border-b border-gray-100">
-                <td className="py-2 pr-4 text-gray-600">{e.date.toLocaleDateString()}</td>
+                <td className="py-2 pr-4 text-gray-600">{formatManilaDate(e.date)}</td>
                 <td className="py-2 pr-4">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${

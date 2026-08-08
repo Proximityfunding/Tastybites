@@ -7,6 +7,7 @@ import { useCartStore } from "@/lib/cart";
 import { formatCentavos } from "@/lib/money";
 import { submitPOSOrder } from "./actions";
 import Receipt from "../orders/Receipt";
+import { formatManilaTime } from "@/lib/timezone";
 import type { Order, OrderItem, Product as ProductModel, Customer } from "@prisma/client";
 
 type Product = {
@@ -632,7 +633,7 @@ function OrderSlip({
           ))}
         </div>
 
-        <div className="mt-3 text-xs text-gray-500">Time: {new Date().toLocaleTimeString()}</div>
+        <div className="mt-3 text-xs text-gray-500">Time: {formatManilaTime(new Date())}</div>
       </div>
     </div>
   );

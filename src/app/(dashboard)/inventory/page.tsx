@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
+import { formatManilaDateTime } from "@/lib/timezone";
 import { recordStockMovement } from "./actions";
 import { FormSelect, FormField, SubmitButton } from "@/components/FormField";
 
@@ -129,7 +130,7 @@ export default async function InventoryPage() {
           <tbody>
             {recentLogs.map((log) => (
               <tr key={log.id} className="border-b border-gray-100">
-                <td className="py-2 pr-4 text-gray-600">{log.createdAt.toLocaleString()}</td>
+                <td className="py-2 pr-4 text-gray-600">{formatManilaDateTime(log.createdAt)}</td>
                 <td className="py-2 pr-4 text-gray-900">{log.ingredient.name}</td>
                 <td className="py-2 pr-4 text-gray-600">{log.type}</td>
                 <td className="py-2 pr-4 text-gray-600">

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { getPeakHoursHeatmap, getBestSellers, getCustomerInsights } from "@/lib/analytics";
+import { manilaDayStart, manilaDayEnd } from "@/lib/timezone";
 import StatCard from "@/components/StatCard";
 import PeakHoursHeatmap from "./PeakHoursHeatmap";
 
@@ -14,11 +15,13 @@ export default async function DashboardPage() {
   const branchId = session!.user.branchId;
   const role = session!.user.role;
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = manilaDayStart();
+  const todayEnd = manilaDayEnd();
 
   const [todayOrders, lowStockIngredients, pendingDeliveries] = await Promise.all([
-    db.order.findMany({ where: { branchId, status: "COMPLETED", createdAt: { gte: todayStart } } }),
+    db.order.findMany({
+      where: { branchId, status: "COMPLETED", createdAt: { gte: todayStart, lte: todayEnd } },
+    }),
     db.ingredient.findMany({ where: { branchId } }),
     db.delivery.count({ where: { order: { branchId }, status: { in: ["PENDING", "DISPATCHED"] } } }),
   ]);

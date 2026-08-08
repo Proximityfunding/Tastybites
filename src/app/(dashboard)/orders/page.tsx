@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { requirePagePermission } from "@/lib/access";
 import { formatCentavos } from "@/lib/money";
 import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS } from "@/lib/orderStatus";
+import { manilaDayStart, manilaDayEnd, manilaDateFromInput, formatManilaDateTime } from "@/lib/timezone";
 import AutoRefresh from "@/components/AutoRefresh";
 import RecordPaymentButton from "./RecordPaymentButton";
 import { changeOrderStatus } from "./actions";
@@ -18,11 +19,11 @@ const PAYMENT_LABELS: Record<string, string> = {
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; channel?: string }>;
+  searchParams: Promise<{ status?: string; channel?: string; date?: string }>;
 }) {
   await requirePagePermission("orders");
   const session = await auth();
-  const { status, channel } = await searchParams;
+  const { status, channel, date } = await searchParams;
   const isKitchen = session!.user.role === "KITCHEN";
 
   const orders = await db.order.findMany({
@@ -34,6 +35,9 @@ export default async function OrdersPage({
           ? { status: status as OrderStatus }
           : {}),
       ...(channel ? { channel: channel as never } : {}),
+      ...(date
+        ? { createdAt: { gte: manilaDayStart(manilaDateFromInput(date)), lte: manilaDayEnd(manilaDateFromInput(date)) } }
+        : {}),
     },
     orderBy: { createdAt: "desc" },
     take: 100,
@@ -59,12 +63,40 @@ export default async function OrdersPage({
       </div>
 
       {!isKitchen && (
-        <div className="mb-4 flex gap-4 text-sm">
-          <FilterLink label="All Statuses" param="status" value={undefined} current={status} />
-          {Object.entries(STATUS_LABELS).map(([value, label]) => (
-            <FilterLink key={value} label={label} param="status" value={value} current={status} />
-          ))}
-        </div>
+        <>
+          <form action="/orders" method="get" className="mb-3 flex items-center gap-2 text-sm">
+            {status && <input type="hidden" name="status" value={status} />}
+            {channel && <input type="hidden" name="channel" value={channel} />}
+            <label htmlFor="date" className="font-medium text-gray-700">
+              Date
+            </label>
+            <input
+              id="date"
+              type="date"
+              name="date"
+              defaultValue={date || ""}
+              className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+            />
+            <button
+              type="submit"
+              className="rounded-md bg-orange-600 px-3 py-1 text-xs font-semibold text-white hover:bg-orange-700"
+            >
+              Filter
+            </button>
+            {date && (
+              <Link href={buildOrdersHref({ status, channel })} className="text-xs text-gray-500 hover:text-gray-800">
+                Clear date
+              </Link>
+            )}
+          </form>
+
+          <div className="mb-4 flex gap-4 text-sm">
+            <FilterLink label="All Statuses" param="status" value={undefined} current={status} channel={channel} date={date} />
+            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+              <FilterLink key={value} label={label} param="status" value={value} current={status} channel={channel} date={date} />
+            ))}
+          </div>
+        </>
       )}
 
       <table className="w-full border-collapse text-sm">
@@ -89,7 +121,7 @@ export default async function OrdersPage({
                   <Link href={`/orders/${order.id}`} className="font-medium text-orange-600 hover:underline">
                     #{order.id.slice(-6)}
                   </Link>
-                  <div className="text-xs text-gray-400">{order.createdAt.toLocaleString()}</div>
+                  <div className="text-xs text-gray-400">{formatManilaDateTime(order.createdAt)}</div>
                 </td>
                 <td className="py-2 pr-4 text-gray-600">{order.channel}</td>
                 <td className="py-2 pr-4 text-gray-600">{order.items.length} item(s)</td>
@@ -136,19 +168,32 @@ export default async function OrdersPage({
   );
 }
 
+function buildOrdersHref(params: { status?: string; channel?: string; date?: string }) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.channel) query.set("channel", params.channel);
+  if (params.date) query.set("date", params.date);
+  const qs = query.toString();
+  return qs ? `/orders?${qs}` : "/orders";
+}
+
 function FilterLink({
   label,
   param,
   value,
   current,
+  channel,
+  date,
 }: {
   label: string;
   param: string;
   value: string | undefined;
   current: string | undefined;
+  channel: string | undefined;
+  date: string | undefined;
 }) {
   const isActive = current === value;
-  const href = value ? `/orders?${param}=${value}` : "/orders";
+  const href = buildOrdersHref({ [param]: value, channel, date } as Record<string, string | undefined>);
   return (
     <Link href={href} className={isActive ? "font-semibold text-orange-600" : "text-gray-500 hover:text-gray-800"}>
       {label}
